@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+
+"""
+"" pamrfid
+"" Configuration check program.
+""
+"" Copyright 2014 Philipp Meisberger, Bastian Raschke.
+"" All rights reserved.
+"""
+
+import sys 
+sys.path.append('/usr/lib')
+
+from pamrfid.version import VERSION
+from pamrfid.Config import *
+
+from PyRfid.PyRfid import *
+
+import argparse
+import hashlib
+
+
+class PamFingerprintCheck(object):
+
+    """
+    "" The PyRfid instance
+    "" @var PyRfid __rfid
+    """
+    __rfid = None
+
+    """
+    "" Constructor
+    ""
+    "" @return void
+    """
+    def __init__(self):
+
+        ## Tries to init config instance
+        try:
+            self.__config = Config('/etc/pamrfid.conf')
+
+        except:
+            e = sys.exc_info()[1]
+            print '[Exception] ' + e.message
+            exit(1)
+
+        ## Gets connection values
+        port = self.__config.readString('PyRfid', 'port')
+        baudRate = self.__config.readInteger('PyRfid', 'baudRate')
+
+        ## Tries to establish connection
+        try:
+            self.__rfid = PyRfid(port, baudRate)
+
+        except:
+            e = sys.exc_info()[1]
+            print '[Exception] The RFID sensor could not be initialized: ' + e.message
+            exit(1)
+
+    """
+    "" Do a RFID check for a given user.
+    ""
+    "" @param string userName
+    "" @return boolean
+    """
+    def checkUser(self, userName):
+
+        ## Checks if the the user was already added
+        if ( self.__config.itemExists('Users', userName) == False ):
+            print '[Error] The user "' + userName + '" is not added!'
+            return False
+
+        ## Tries to get user information
+        try:
+            expectedRfidHash = self.__config.readString('Users', userName)
+
+        except:
+            e = sys.exc_info()[1]
+            print '[Exception] ' + e.message
+            return False
+
+        ## Tries to check RFID
+        try:
+            print 'Waiting for tag...'
+
+            while ( self.__rfid.read() != True ):
+                pass
+
+            ## Calculates hash of template
+            print 'Calculating hash...'
+            rfidHash = hashlib.sha256(self.__rfid.tagId).hexdigest()
+
+            print 'Checking if calculated hash matches stored hash...'
+
+            ## Checks if read hash matches stored hash
+            if ( rfidHash == expectedRfidHash ):
+                print 'Hashes match!'
+                print 'Check for user "' + userName + '" was successful!'
+            else:
+                raise Exception('The found RFID is not assigned to user (the hash does not match)!')
+
+        except:
+            e = sys.exc_info()[1]
+            print '[Exception] Check for user "' + userName + '" failed: ' + e.message
+            return False
+
+        return True
+
+
+if ( __name__ == '__main__' ):
+
+    parser = argparse.ArgumentParser(description = 'pamrfid simulation program:')
+
+    parser.add_argument('--check-user', metavar='NAME', help='Checks RFID for an existing user.')
+    parser.add_argument('--version', '-v', action='version', version='pamrfid ' + VERSION, help='Prints version and exits.')
+
+    args = vars(parser.parse_args())
+        
+    if ( args['check_user'] ):
+        PamFingerprintCheck().checkUser(args['check_user'])
+    else:
+        parser.print_help()

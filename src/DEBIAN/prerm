@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if ( test "$1" = "remove" || test "$1" = "purge" ); then
+    ## Deletes compiled Python files before removing package
+    find /usr/lib/pamrfid/ -type f -name *.pyc -exec rm {} \;
+    find /usr/lib/python2.7/dist-packages/PyRfid/ -type f -name *.pyc -exec rm {} \;
+fi

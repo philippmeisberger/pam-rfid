@@ -1,0 +1,184 @@
+#!/usr/bin/env python
+
+"""
+"" pamrfid
+"" Configuration program.
+""
+"" Copyright 2014 Philipp Meisberger, Bastian Raschke.
+"" All rights reserved.
+"""
+
+import sys 
+sys.path.append('/usr/lib')
+
+from pamrfid.version import VERSION
+from pamrfid.Config import *
+
+from PyRfid.PyRfid import *
+
+import hashlib
+import argparse
+import os
+
+
+class PamFingerprint(object):
+
+    """
+    "" The PyRfid instance
+    "" @var PyRfid __rfid
+    """
+    __rfid = None
+
+    """
+    "" Config instance
+    "" @var Config __config
+    """
+    __config = None
+    
+    """
+    "" Constructor
+    ""
+    "" @return void
+    """
+    def __init__(self):
+
+        ## Tries to init config instance
+        try:
+            self.__config = Config('/etc/pamrfid.conf')
+
+        except:
+            e = sys.exc_info()[1]
+            print '[Exception] ' + e.message
+            exit(1)
+
+        ## Gets connection values
+        port = self.__config.readString('PyRfid', 'port')
+        baudRate = self.__config.readInteger('PyRfid', 'baudRate')
+
+        ## Tries to establish connection
+        try:
+            self.__rfid = PyRfid(port, baudRate)
+
+        except:
+            e = sys.exc_info()[1]
+            print '[Exception] The RFID sensor could not be initialized: ' + e.message
+            exit(1)
+    
+    """
+    "" Shows confirmation dialog.
+    ""
+    "" @param string question
+    "" @return boolean
+    """
+    def __showConfirmationDialog(self, question = ''):
+
+        answer = raw_input(question + ' (Y/n)')
+
+        if ( answer not in ['y', 'Y', ''] ):
+            return False
+        else:
+            return True
+
+    """
+    "" Enrolls new RFID tag and adds user to pamrfid.
+    ""
+    "" @param string userName
+    "" @return boolean
+    """
+    def addUser(self, userName):
+
+        ## Checks if user is root
+        if ( os.geteuid() != 0 ):
+            print '[Error] You need to have root privileges to add a user!'
+            return False
+
+        ## Checks if the the user is not already added
+        if ( self.__config.itemExists('Users', userName) == True ):
+            print '[Error] The user "' + userName + '" is already added!'
+            return False
+
+        ## Confirmation dialog
+        if ( self.__showConfirmationDialog('Are you sure you want to add the user "' + userName + '"?') == False ):
+            print 'Adding user canceled.'
+            return False
+
+        ## Tries to bind a tag to a user
+        try:
+            print 'Waiting for tag...'
+
+            while ( self.__rfid.read() != True ):
+                pass
+
+            ## The new user information
+            rfidHash = hashlib.sha256(self.__rfid.tagId).hexdigest() 
+
+            ## Adds user to configuration file
+            self.__config.writeString('Users', userName, rfidHash)
+
+            if ( self.__config.save() == True ):
+                print 'The user "' + userName + '" has been added successfully!'
+            else:
+                raise Exception('The configuration could not be written!')
+
+        except:
+            e = sys.exc_info()[1]
+            print '[Exception] Error while adding user: ' + e.message
+            return False
+
+        return True
+
+    """
+    "" Removes RFID tag from configuration.
+    ""
+    "" @param string userName
+    "" @return boolean
+    """
+    def removeUser(self, userName):
+
+        ## Checks if user is root
+        if ( os.geteuid() != 0 ):
+            print '[Error] You need to have root privileges to add a user!'
+            return False
+
+        ## Checks if the the user was already added
+        if ( self.__config.itemExists('Users', userName) == False ):
+            print '[Error] The user "' + userName + '" is not added!'
+            return False
+
+        ## Confirmation dialog
+        if ( self.__showConfirmationDialog('Are you sure you want to remove the user "' + userName + '"?') == False ):
+            print 'Removing user canceled.'
+            return False
+
+        ## Tries to delete tag
+        try:
+            ## Removes entries from configuration file
+            if ( self.__config.remove('Users', userName) == True and self.__config.save() == True ):
+                print 'The user "' + userName + '" has been removed successfully!'
+            else:
+                raise Exception('The configuration file could not be written!')
+
+        except:
+            e = sys.exc_info()[1]
+            print '[Exception] Error while removing user: ' + e.message
+            return False
+
+        return True
+
+
+if ( __name__ == '__main__' ):
+
+    parser = argparse.ArgumentParser(description = 'pamrfid configuration program:')
+
+    parser.add_argument('--add-user', metavar='NAME', help='Adds a new user.')
+    parser.add_argument('--remove-user', metavar='NAME', help='Removes a user.')
+    parser.add_argument('--version', '-v', action='version', version='pamrfid '+ VERSION, help='Prints version and exits.')
+
+    args = vars(parser.parse_args())
+
+    if ( args['add_user'] ):
+        PamFingerprint().addUser(args['add_user'])
+    elif ( args['remove_user'] ):
+        PamFingerprint().removeUser(args['remove_user'])
+    else:
+        parser.print_help()
