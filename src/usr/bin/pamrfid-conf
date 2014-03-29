@@ -48,7 +48,7 @@ class PamRfid(object):
 
         ## Tries to init RFID sensor
         if ( os.path.exists(port) == False ):
-            print '[Exception] The RFID sensor could not be initialized: Port "'+ port +'"not found!' 
+            print '[Exception] The RFID sensor could not be initialized: Port "'+ port +'" not found!' 
             exit(1)
     
     """

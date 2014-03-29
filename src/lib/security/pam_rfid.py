@@ -84,7 +84,7 @@ def pam_sm_authenticate(pamh, flags, argv):
 
     ## Tries to init RFID sensor
     if ( os.path.exists(port) == False ):
-        logger.error('The RFID sensor could not be initialized!', exc_info=True)
+        logger.error('The RFID sensor could not be initialized: Port "'+ port +'" not found!')
         pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Sensor initialization failed!'))
         return pamh.PAM_IGNORE
         
