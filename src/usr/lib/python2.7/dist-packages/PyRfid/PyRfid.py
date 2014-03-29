@@ -12,38 +12,38 @@
 "" All rights reserved. 
 """
 
-from utilities import *
+import utilities
 import serial
+import os
 
-
-class RFID(object):
+class PyRfid(object):
 
     """
-    "" Flag for RFID connection start
+    "" Flag for RFID connection start.
     "" @var hex RFID_STARTCODE
     """
     RFID_STARTCODE = 0x02
 
     """
-    "" Flag for RFID connection end
+    "" Flag for RFID connection end.
     "" @var hex RFID_ENDCODE
     """
     RFID_ENDCODE = 0x03
 
     """
-    "" UART serial connection via PySerial
+    "" UART serial connection via PySerial.
     "" @var Serial __serial
     """
     __serial = None
 
     """
-    "" Holds the ID after reading
+    "" Holds the ID after reading.
     "" @var string __tagId
     """
     __tagId = None
     
     """
-    "" Holds the checksum after reading
+    "" Holds the checksum after reading.
     "" @var string __checksum
     """
     __checksum = None
@@ -57,12 +57,14 @@ class RFID(object):
     """
     def __init__(self, port = '/dev/ttyUSB0', baudRate = 9600):
 
+        ## Validates port
+        if ( os.path.exists(port) == False ):
+            raise Exception('The RFID sensor port "' + port + '" was not found!')
+            
         ## Initializes connection
-        self.__serial = serial.Serial(port = port, baudrate = baudRate)
-        self.__serial.bytesize = serial.EIGHTBITS
-        self.__serial.timeout = 2
-        self.__serial.close()
-        self.__serial.open()
+        self.__serial = serial.Serial(port = port, baudrate = baudRate, bytesize = serial.EIGHTBITS, timeout = 1)
+        #self.__serial.close()
+        #self.__serial.open()
 
     """
     "" Destructor
@@ -72,7 +74,7 @@ class RFID(object):
     def __del__(self):
 
         ## Closes connection if established
-        if ( self.__serial != None ):
+        if ( self.__serial != None and self.__serial.isOpen() == True ):
             self.__serial.close()
     
     """
@@ -84,13 +86,25 @@ class RFID(object):
 
         self.__tagId = None
         self.__checksum = None
-        receivedPacketData = []
-        index = 0
+        #receivedPacketData = []
+        #index = 0
 
         while ( True ):
 
             ## Reads one byte
+            receivedFragment = self.__serial.read()            
+            
+            if ( receivedFragment == '02' ): #self.RFID_STARTCODE ):
+                print 'Start!'
+            elif ( receivedFragment == '03' ): #self.RFID_ENDCODE ):
+                print 'End!'
+            else:
+                print '"'+ receivedFragment +'"' 
+            
+    """
+            ## Reads one byte
             receivedFragment = self.__serial.read()
+            print str(index) +': '+ receivedFragment
 
             if ( len(receivedFragment) != 0 ):
                 receivedFragment = utilities.stringToByte(receivedFragment)
@@ -103,7 +117,7 @@ class RFID(object):
             if ( index == 13 ):
 
                 ## Checks if start and end bytes are valid
-                if ( receivedPacketData[0] != utilities.rightShift(RFID_STARTCODE, 8) | receivedPacketData[13] != utilities.rightShift(RFID_ENDCODE, 8) ):
+                if ( receivedPacketData[0] != utilities.rightShift(self.RFID_STARTCODE, 8) | receivedPacketData[13] != utilities.rightShift(self.RFID_ENDCODE, 8) ):
                     raise Exception('Invalid packet header!')
 
                 packetPayload = []
@@ -135,7 +149,7 @@ class RFID(object):
                 self.__tagId = tagId
 
                 return True
-
+    """
     """
     "" Returns ID of tag.
     ""
@@ -191,7 +205,19 @@ print "------------------------------------------"
 """
 
 # Tests:
-if (__name__ == '__main__'):
+if ( __name__ == '__main__' ):
 
-    rfid = RFID('/dev/USB0', 9600)
-    cardId = rfid.read()
+    __rfid = PyRfid()#'/dev/ttyUSB0', 9600)
+
+    ## Tries to bind a tag to a user
+    try:
+        print 'Waiting for tag...'
+
+        while ( __rfid.read() != True ):
+            pass
+
+        ## The new user information
+        rfidHash = hashlib.sha256(__rfid.tagId).hexdigest() 
+
+    except Exception as e:
+        print '[Exception] '+ e.message

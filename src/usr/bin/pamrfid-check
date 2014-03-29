@@ -20,7 +20,7 @@ import argparse
 import hashlib
 
 
-class PamFingerprintCheck(object):
+class PamRfidCheck(object):
 
     """
     "" The PyRfid instance
@@ -117,6 +117,6 @@ if ( __name__ == '__main__' ):
     args = vars(parser.parse_args())
         
     if ( args['check_user'] ):
-        PamFingerprintCheck().checkUser(args['check_user'])
+        PamRfidCheck().checkUser(args['check_user'])
     else:
         parser.print_help()

@@ -21,7 +21,7 @@ import argparse
 import os
 
 
-class PamFingerprint(object):
+class PamRfid(object):
 
     """
     "" The PyRfid instance
@@ -167,7 +167,7 @@ class PamFingerprint(object):
 
 
 if ( __name__ == '__main__' ):
-
+ 
     parser = argparse.ArgumentParser(description = 'pamrfid configuration program:')
 
     parser.add_argument('--add-user', metavar='NAME', help='Adds a new user.')
@@ -177,8 +177,8 @@ if ( __name__ == '__main__' ):
     args = vars(parser.parse_args())
 
     if ( args['add_user'] ):
-        PamFingerprint().addUser(args['add_user'])
+        PamRfid().addUser(args['add_user'])
     elif ( args['remove_user'] ):
-        PamFingerprint().removeUser(args['remove_user'])
+        PamRfid().removeUser(args['remove_user'])
     else:
         parser.print_help()
