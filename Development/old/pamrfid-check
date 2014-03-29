@@ -14,12 +14,19 @@ sys.path.append('/usr/lib')
 from pamrfid.version import VERSION
 from pamrfid.Config import *
 
+from PyRfid.PyRfid import *
+
 import argparse
 import hashlib
-import getpass
 
 
 class PamRfidCheck(object):
+
+    """
+    "" The PyRfid instance
+    "" @var PyRfid __rfid
+    """
+    __rfid = None
 
     """
     "" Constructor
@@ -39,10 +46,15 @@ class PamRfidCheck(object):
 
         ## Gets connection values
         port = self.__config.readString('PyRfid', 'port')
+        baudRate = self.__config.readInteger('PyRfid', 'baudRate')
 
-        ## Tries to init RFID sensor
-        if ( os.path.exists(port) == False ):
-            print '[Exception] The RFID sensor could not be initialized: Port "'+ port +'"not found!' 
+        ## Tries to establish connection
+        try:
+            self.__rfid = PyRfid(port, baudRate)
+
+        except:
+            e = sys.exc_info()[1]
+            print '[Exception] The RFID sensor could not be initialized: ' + e.message
             exit(1)
 
     """
@@ -60,7 +72,7 @@ class PamRfidCheck(object):
 
         ## Tries to get user information
         try:
-            expectedTagHash = self.__config.readString('Users', userName)
+            expectedRfidHash = self.__config.readString('Users', userName)
 
         except:
             e = sys.exc_info()[1]
@@ -69,20 +81,23 @@ class PamRfidCheck(object):
 
         ## Tries to check RFID
         try:
-            tagId = getpass.getpass('Waiting for tag...')
+            print 'Waiting for tag...'
 
-            ## Calculates hash of tag ID
+            while ( self.__rfid.read() != True ):
+                pass
+
+            ## Calculates hash of template
             print 'Calculating hash...'
-            tagHash = hashlib.sha256(tagId).hexdigest()
+            rfidHash = hashlib.sha256(self.__rfid.tagId).hexdigest()
 
             print 'Checking if calculated hash matches stored hash...'
 
             ## Checks if read hash matches stored hash
-            if ( tagHash == expectedTagHash ):
+            if ( rfidHash == expectedRfidHash ):
                 print 'Hashes match!'
                 print 'Check for user "' + userName + '" was successful!'
             else:
-                raise Exception('The found tag is not assigned to user!')
+                raise Exception('The found RFID is not assigned to user (the hash does not match)!')
 
         except:
             e = sys.exc_info()[1]

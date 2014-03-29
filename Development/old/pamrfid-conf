@@ -14,12 +14,20 @@ sys.path.append('/usr/lib')
 from pamrfid.version import VERSION
 from pamrfid.Config import *
 
+from PyRfid.PyRfid import *
+
 import hashlib
 import argparse
-import getpass
+import os
 
 
 class PamRfid(object):
+
+    """
+    "" The PyRfid instance
+    "" @var PyRfid __rfid
+    """
+    __rfid = None
 
     """
     "" Config instance
@@ -45,10 +53,15 @@ class PamRfid(object):
 
         ## Gets connection values
         port = self.__config.readString('PyRfid', 'port')
+        baudRate = self.__config.readInteger('PyRfid', 'baudRate')
 
-        ## Tries to init RFID sensor
-        if ( os.path.exists(port) == False ):
-            print '[Exception] The RFID sensor could not be initialized: Port "'+ port +'"not found!' 
+        ## Tries to establish connection
+        try:
+            self.__rfid = PyRfid(port, baudRate)
+
+        except:
+            e = sys.exc_info()[1]
+            print '[Exception] The RFID sensor could not be initialized: ' + e.message
             exit(1)
     
     """
@@ -91,13 +104,16 @@ class PamRfid(object):
 
         ## Tries to bind a tag to a user
         try:
-            tagId = getpass.getpass('Waiting for tag...')
+            print 'Waiting for tag...'
+
+            while ( self.__rfid.read() != True ):
+                pass
 
             ## The new user information
-            tagHash = hashlib.sha256(tagId).hexdigest() 
+            rfidHash = hashlib.sha256(self.__rfid.tagId).hexdigest() 
 
             ## Adds user to configuration file
-            self.__config.writeString('Users', userName, tagHash)
+            self.__config.writeString('Users', userName, rfidHash)
 
             if ( self.__config.save() == True ):
                 print 'The user "' + userName + '" has been added successfully!'
