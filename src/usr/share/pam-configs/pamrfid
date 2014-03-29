@@ -1,4 +1,4 @@
-Name: Fingerprint authentication
+Name: RFID authentication
 Default: yes
 Priority: 257
 Auth-Type: Primary

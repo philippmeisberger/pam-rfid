@@ -92,15 +92,19 @@ class PyRfid(object):
         while ( True ):
 
             ## Reads one byte
-            receivedFragment = self.__serial.read()            
+            receivedFragment = self.__serial.read()
+
+            if ( len(receivedFragment) > 0 ):
+                print receivedFragment
             
+            """
             if ( receivedFragment == '02' ): #self.RFID_STARTCODE ):
                 print 'Start!'
             elif ( receivedFragment == '03' ): #self.RFID_ENDCODE ):
                 print 'End!'
             else:
                 print '"'+ receivedFragment +'"' 
-            
+            """
     """
             ## Reads one byte
             receivedFragment = self.__serial.read()
