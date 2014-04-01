@@ -63,8 +63,6 @@ class PyRfid(object):
             
         ## Initializes connection
         self.__serial = serial.Serial(port = port, baudrate = baudRate, bytesize = serial.EIGHTBITS, timeout = 1)
-        #self.__serial.close()
-        #self.__serial.open()
 
     """
     "" Destructor
@@ -86,52 +84,43 @@ class PyRfid(object):
 
         self.__tagId = None
         self.__checksum = None
-        #receivedPacketData = []
-        #index = 0
+        receivedPacketData = []
+        index = 0
 
         while ( True ):
 
             ## Reads one byte
             receivedFragment = self.__serial.read()
-
-            if ( len(receivedFragment) > 0 ):
-                print receivedFragment
-            
-            """
-            if ( receivedFragment == '02' ): #self.RFID_STARTCODE ):
-                print 'Start!'
-            elif ( receivedFragment == '03' ): #self.RFID_ENDCODE ):
-                print 'End!'
-            else:
-                print '"'+ receivedFragment +'"' 
-            """
-    """
-            ## Reads one byte
-            receivedFragment = self.__serial.read()
             print str(index) +': '+ receivedFragment
 
             if ( len(receivedFragment) != 0 ):
-                receivedFragment = utilities.stringToByte(receivedFragment)
+                #receivedFragment = utilities.stringToByte(receivedFragment)
 
-            ## Inserts byte if packet seems valid
-            receivedPacketData.insert(index, receivedFragment)
-            index += 1
+                ## Inserts byte if packet seems valid
+                receivedPacketData.insert(index, receivedFragment)
+                index += 1
 
             ## Packet complete received (maximum length is 14 bytes)
-            if ( index == 13 ):
+            if ( index == 14 ):
 
+                print 'complete!'
+                return True
+                
+                """
                 ## Checks if start and end bytes are valid
-                if ( receivedPacketData[0] != utilities.rightShift(self.RFID_STARTCODE, 8) | receivedPacketData[13] != utilities.rightShift(self.RFID_ENDCODE, 8) ):
+                if ( receivedPacketData[0] != self.RFID_STARTCODE | receivedPacketData[13] != self.RFID_ENDCODE ):
                     raise Exception('Invalid packet header!')
 
                 packetPayload = []
-
+                checksum = 0x00
+                
                 ## Collects package payload (10 bytes) and calculates checksum
-                for i in range(1, 11):
+                for i in range(1, 12, 2):
+                    checksum = checksum ^ receivedPacketData[i] ^ receivedPacketData[i+1]
                     packetPayload.append(receivedPacketData[i])
-                    #packetChecksum += receivedPacketData[i]
-                    packetChecksum = utilities.leftShift(receivedPacketData[i], 8)
-                    packetChecksum = packetChecksum | utilities.leftShift(receivedPacketData[i+1], 0)
+                    print receivedPacketData[i]
+
+                print checksum    
                 
                 ## Calculates checksum of the 2 checksum bytes
                 receivedChecksum = utilities.leftShift(receivedPacketData[11], 8)
@@ -151,9 +140,10 @@ class PyRfid(object):
 
                 ## Store ID of tag
                 self.__tagId = tagId
-
+                
                 return True
-    """
+                """
+    
     """
     "" Returns ID of tag.
     ""
@@ -211,7 +201,7 @@ print "------------------------------------------"
 # Tests:
 if ( __name__ == '__main__' ):
 
-    __rfid = PyRfid()#'/dev/ttyUSB0', 9600)
+    __rfid = PyRfid('/dev/ttyUSB0', 9600)
 
     ## Tries to bind a tag to a user
     try:
@@ -221,7 +211,7 @@ if ( __name__ == '__main__' ):
             pass
 
         ## The new user information
-        rfidHash = hashlib.sha256(__rfid.tagId).hexdigest() 
+        #rfidHash = hashlib.sha256(__rfid.tagId).hexdigest() 
 
     except Exception as e:
         print '[Exception] '+ e.message

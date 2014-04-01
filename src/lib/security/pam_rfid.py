@@ -81,12 +81,17 @@ def pam_sm_authenticate(pamh, flags, argv):
 
     ## Gets sensor connection values
     port = config.readString('PyRfid', 'port')
+    baudRate = self.__config.readInteger('PyRfid', 'baudRate')
 
-    ## Tries to init RFID sensor
-    if ( os.path.exists(port) == False ):
-        logger.error('The RFID sensor could not be initialized: Port "'+ port +'" not found!')
+    ## Tries to establish connection
+    try:
+        self.__rfid = PyRfid(port, baudRate)
+
+    except:
+        e = sys.exc_info()[1]
+        logger.error(e.message, exc_info=True)
         pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Sensor initialization failed!'))
-        return pamh.PAM_IGNORE
+        return pamh.PAM_IGNORE        
         
     msg = pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Waiting for tag...')
     pamh.conversation(msg)

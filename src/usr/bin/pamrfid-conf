@@ -14,6 +14,8 @@ sys.path.append('/usr/lib')
 from pamrfid.version import VERSION
 from pamrfid.Config import *
 
+from PyRfid.PyRfid import *
+
 import hashlib
 import argparse
 import getpass
@@ -45,10 +47,15 @@ class PamRfid(object):
 
         ## Gets connection values
         port = self.__config.readString('PyRfid', 'port')
+        baudRate = self.__config.readInteger('PyRfid', 'baudRate')
 
-        ## Tries to init RFID sensor
-        if ( os.path.exists(port) == False ):
-            print '[Exception] The RFID sensor could not be initialized: Port "'+ port +'" not found!' 
+        ## Tries to establish connection
+        try:
+            self.__rfid = PyRfid(port, baudRate)
+
+        except:
+            e = sys.exc_info()[1]
+            print '[Exception] The RFID sensor could not be initialized: ' + e.message
             exit(1)
     
     """
