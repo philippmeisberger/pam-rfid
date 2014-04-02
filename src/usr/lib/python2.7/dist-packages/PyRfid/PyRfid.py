@@ -83,66 +83,53 @@ class PyRfid(object):
     def read(self):
 
         self.__tagId = None
-        self.__checksum = None
+        checksum = 0
         receivedPacketData = []
         index = 0
 
         while ( True ):
 
-            ## Reads one byte
+            ## Reads on byte
             receivedFragment = self.__serial.read()
-            print str(index) +': '+ receivedFragment
-
+            
+            ## Collect RFID data
             if ( len(receivedFragment) != 0 ):
-                #receivedFragment = utilities.stringToByte(receivedFragment)
 
-                ## Inserts byte if packet seems valid
-                receivedPacketData.insert(index, receivedFragment)
+                ## Coverts received string to byte for calculation
+                receivedFragment = utilities.stringToByte(receivedFragment)
+                receivedPacketData.append(receivedFragment)
                 index += 1
+                print hex(receivedFragment)
 
-            ## Packet complete received (maximum length is 14 bytes)
-            if ( index == 14 ):
+            ## Packet completly received
+            if ( index == 14):
+            
+                ## Checks for invalid packet data
+                if ( receivedPacketData[0] != self.RFID_STARTCODE ) or ( receivedPacketData[13] != self.RFID_ENDCODE ): 
+                    raise Exception('Invalid packet data!')
 
-                print 'complete!'
+                print '-----------'
+
+                ## Calculates packet checksum
+                for i in range(1, 10, 2):
+                    #byteToCheck = utilities.leftShift(receivedPacketData[i], 8)
+                    #byteToCheck = byteToCheck | receivedPacketData[i+1]                
+                    checksum = checksum ^ byteToCheck
+
+                ## Gets received packet checksum
+                #receivedChecksum = utilities.leftShift(receivedPacketData[11], 8)
+                #receivedChecksum = receivedChecksum | receivedPacketData[12]  
+
+                receivedChecksum = receivedPacketData[11] + receivedPacketData[12]
+
+                print checksum
+                print receivedChecksum
+
+                ## Checks for wrong checksum
+                if ( checksum != receivedChecksum ):
+                    raise Exception('Calculated checksum is wrong!')
+
                 return True
-                
-                """
-                ## Checks if start and end bytes are valid
-                if ( receivedPacketData[0] != self.RFID_STARTCODE | receivedPacketData[13] != self.RFID_ENDCODE ):
-                    raise Exception('Invalid packet header!')
-
-                packetPayload = []
-                checksum = 0x00
-                
-                ## Collects package payload (10 bytes) and calculates checksum
-                for i in range(1, 12, 2):
-                    checksum = checksum ^ receivedPacketData[i] ^ receivedPacketData[i+1]
-                    packetPayload.append(receivedPacketData[i])
-                    print receivedPacketData[i]
-
-                print checksum    
-                
-                ## Calculates checksum of the 2 checksum bytes
-                receivedChecksum = utilities.leftShift(receivedPacketData[11], 8)
-                receivedChecksum = receivedChecksum | utilities.leftShift(receivedPacketData[12], 0)
-                
-                if ( packetChecksum != receivedChecksum ):
-                    raise Exception('Checksum of packet is wrong!')
-
-                ## Store checksum
-                self.__checksum = receivedChecksum
-                
-                ## Gets ID of tag
-                tagId = ''
-
-                for i in range(2, 10):
-                    tagId += packetPayload[i]                
-
-                ## Store ID of tag
-                self.__tagId = tagId
-                
-                return True
-                """
     
     """
     "" Returns ID of tag.
