@@ -18,16 +18,10 @@ from PyRfid.PyRfid import *
 
 import hashlib
 import argparse
-import os
+import getpass
 
 
 class PamRfid(object):
-
-    """
-    "" The PyRfid instance
-    "" @var PyRfid __rfid
-    """
-    __rfid = None
 
     """
     "" Config instance
@@ -104,16 +98,13 @@ class PamRfid(object):
 
         ## Tries to bind a tag to a user
         try:
-            print 'Waiting for tag...'
-
-            while ( self.__rfid.read() != True ):
-                pass
+            tagId = getpass.getpass('Waiting for tag...')
 
             ## The new user information
-            rfidHash = hashlib.sha256(self.__rfid.tagId).hexdigest() 
+            tagHash = hashlib.sha256(tagId).hexdigest() 
 
             ## Adds user to configuration file
-            self.__config.writeString('Users', userName, rfidHash)
+            self.__config.writeString('Users', userName, tagHash)
 
             if ( self.__config.save() == True ):
                 print 'The user "' + userName + '" has been added successfully!'

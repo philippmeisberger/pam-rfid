@@ -12,6 +12,8 @@ sys.path.append('/usr/lib')
 from pamrfid.version import VERSION
 from pamrfid.Config import *
 
+from PyRfid.PyRfid import *
+
 import hashlib
 import logging
 import os
@@ -97,15 +99,12 @@ def pam_sm_authenticate(pamh, flags, argv):
     pamh.conversation(msg)
 
     ## Tries to read RFID
-    try:       
-        if ( pamh.authtok == None ):
-            ## Waits for tag
-            msg = pamh.Message(pamh.PAM_PROMPT_ECHO_OFF, '')
-            getToken = pamh.conversation(msg)
-            pamh.authtok = getToken.resp
-    
+    try:
+        while (__rfid.read() != True):
+            pass
+       
         ## Hashs read tag ID       
-        tagHash = hashlib.sha256(pamh.authtok).hexdigest()
+        tagHash = hashlib.sha256(__rfid.getId()).hexdigest()
            
         ## Checks if the read Hash matches the stored 
         if ( tagHash == expectedTagHash ):

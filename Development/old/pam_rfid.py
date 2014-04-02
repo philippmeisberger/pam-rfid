@@ -12,10 +12,9 @@ sys.path.append('/usr/lib')
 from pamrfid.version import VERSION
 from pamrfid.Config import *
 
-from PyRfid.PyRfid import *
-
 import hashlib
 import logging
+import os
 
 ## Configures logger
 logger = logging.getLogger(__name__)
@@ -73,7 +72,7 @@ def pam_sm_authenticate(pamh, flags, argv):
 
     ## Tries to get user information
     try:
-        expectedRfidHash = config.readString('Users', userName)
+        expectedTagHash = config.readString('Users', userName)
 
     except:
         e = sys.exc_info()[1]
@@ -81,31 +80,35 @@ def pam_sm_authenticate(pamh, flags, argv):
         return pamh.PAM_AUTH_ERR
 
     ## Gets sensor connection values
-    port = config.readString('RFID', 'port')
-    baudRate = config.readInteger('RFID', 'baudRate')
+    port = config.readString('PyRfid', 'port')
+    baudRate = self.__config.readInteger('PyRfid', 'baudRate')
 
-    ## Tries to init RFID sensor
+    ## Tries to establish connection
     try:
-        rfid = RFID(port, baudRate)
-        
-    except:
-        logger.error('The RFID sensor could not be initialized!', exc_info=True)
-        pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Sensor initialization failed!'))
-        return pamh.PAM_IGNORE
+        self.__rfid = PyRfid(port, baudRate)
 
+    except:
+        e = sys.exc_info()[1]
+        logger.error(e.message, exc_info=True)
+        pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Sensor initialization failed!'))
+        return pamh.PAM_IGNORE        
+        
     msg = pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Waiting for tag...')
     pamh.conversation(msg)
 
     ## Tries to read RFID
-    try:
-        while ( rfid.read() != True ):
-            pass
-
-        ## Hashs read tag ID
-        rfidHash = hashlib.sha256(rfid.tagId).hexdigest()
-            
+    try:       
+        if ( pamh.authtok == None ):
+            ## Waits for tag
+            msg = pamh.Message(pamh.PAM_PROMPT_ECHO_OFF, '')
+            getToken = pamh.conversation(msg)
+            pamh.authtok = getToken.resp
+    
+        ## Hashs read tag ID       
+        tagHash = hashlib.sha256(pamh.authtok).hexdigest()
+           
         ## Checks if the read Hash matches the stored 
-        if (rfidHash == expectedRfidHash ):
+        if ( tagHash == expectedTagHash ):
             logger.info('Access granted!')
             pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Access granted!'))
             return pamh.PAM_SUCCESS

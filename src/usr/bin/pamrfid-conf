@@ -18,10 +18,16 @@ from PyRfid.PyRfid import *
 
 import hashlib
 import argparse
-import getpass
+import os
 
 
 class PamRfid(object):
+
+    """
+    "" The PyRfid instance
+    "" @var PyRfid __rfid
+    """
+    __rfid = None
 
     """
     "" Config instance
@@ -67,11 +73,7 @@ class PamRfid(object):
     def __showConfirmationDialog(self, question = ''):
 
         answer = raw_input(question + ' (Y/n)')
-
-        if ( answer not in ['y', 'Y', ''] ):
-            return False
-        else:
-            return True
+        return ( answer not in ['y', 'Y', ''] )
 
     """
     "" Enrolls new RFID tag and adds user to pamrfid.
@@ -98,10 +100,13 @@ class PamRfid(object):
 
         ## Tries to bind a tag to a user
         try:
-            tagId = getpass.getpass('Waiting for tag...')
+            print 'Waiting for tag...'
 
-            ## The new user information
-            tagHash = hashlib.sha256(tagId).hexdigest() 
+            while ( self.__rfid.read() != True ):
+                pass
+
+            ## Calculates hash of tag ID
+            tagHash = hashlib.sha256(tagId).hexdigest()
 
             ## Adds user to configuration file
             self.__config.writeString('Users', userName, tagHash)

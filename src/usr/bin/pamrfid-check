@@ -18,11 +18,16 @@ from PyRfid.PyRfid import *
 
 import argparse
 import hashlib
-import getpass
 
 
 class PamRfidCheck(object):
 
+    """
+    "" The PyRfid instance
+    "" @var PyRfid __rfid
+    """
+    __rfid = None
+    
     """
     "" Constructor
     ""
@@ -76,7 +81,10 @@ class PamRfidCheck(object):
 
         ## Tries to check RFID
         try:
-            tagId = getpass.getpass('Waiting for tag...')
+            print 'Waiting for tag...'
+
+            while ( self.__rfid.read() != True ):
+                pass
 
             ## Calculates hash of tag ID
             print 'Calculating hash...'
