@@ -29,13 +29,13 @@ class PyRfid(object):
     @var Serial __serial
 
     Holds the complete tag after reading.
-    @var string __tag
+    @var string __rawTag
     """
     
     RFID_STARTCODE = 0x02
     RFID_ENDCODE = 0x03
     __serial = None
-    __tag = None
+    __rawTag = None
     
     def __init__(self, port = '/dev/ttyUSB0', baudRate = 9600):
         """
@@ -59,7 +59,7 @@ class PyRfid(object):
         """
         
         ## Closes connection if established
-        if ( self.__serial != None and self.__serial.isOpen() == True ):
+        if ( ( self.__serial != None ) and ( self.__serial.isOpen() == True ) ):
             self.__serial.close()
     
     def __read(self):
@@ -69,8 +69,8 @@ class PyRfid(object):
         @return boolean
         """
         
-        self.__tag = None
-        tag = ''
+        self.__rawTag = None
+        rawTag = ''
         calculatedChecksum = 0
         receivedPacketData = []
         index = 0
@@ -84,10 +84,10 @@ class PyRfid(object):
             if ( len(receivedFragment) != 0 ):
 
                 ## Start and stop bytes are string encoded and must be byte encoded
-                if ( index == 0 or index == 13):
+                if ( ( index == 0 ) or ( index == 13 ) ):
                     receivedFragment = utilities.stringToByte(receivedFragment)
                 else:
-                    tag += receivedFragment
+                    rawTag += receivedFragment
                     receivedFragment = int(receivedFragment, 16)
 
                 ## Collects RFID data (hexadecimal) 
@@ -98,12 +98,11 @@ class PyRfid(object):
             if ( index == 14 ):
             
                 ## Checks for invalid packet data
-                if ( receivedPacketData[0] != self.RFID_STARTCODE ) or ( receivedPacketData[13] != self.RFID_ENDCODE ): 
+                if ( ( receivedPacketData[0] != self.RFID_STARTCODE ) or ( receivedPacketData[13] != self.RFID_ENDCODE ) ): 
                     raise Exception('Invalid start or stop bytes!')
                 
                 ## Calculates packet checksum
                 for i in range(1, 11, 2):
-
                     byte = utilities.leftShift(receivedPacketData[i], 4)
                     byte = byte | utilities.leftShift(receivedPacketData[i+1], 0)
                     calculatedChecksum = calculatedChecksum ^ byte
@@ -117,69 +116,72 @@ class PyRfid(object):
                     raise Exception('Calculated checksum is wrong!')
 
                 ## Sets complete tag for other methods
-                self.__tag = tag
+                self.__rawTag = rawTag
                 
                 return True
 
     def readTag(self):
         """
-        Returns raw read tag.
+        Reads out raw tag.
+
+        @return boolean
+        """
+        
+        try:
+            while ( self.__read() != True ):
+                pass
+
+        except KeyboardInterrupt:
+            return False
+
+        return True
+            
+    @property
+    def rawTag(self):
+        """
+        Returns read raw tag.
 
         @return string
         """
-
-        while ( self.__read() != True ):
-            pass
-
-        return self.__tag
-            
         
-    @property
-    def tagId(self):
-        """
-        Returns ID of tag.
-        
-        @return string (10 bytes)
-        """
-        if ( self.__tag != None ):
-
-            ## Calculates ID of tag (10 integer digits = zero padding) 
-            return '%010i' % int(self.__tag[4:10], 16)                
+        return self.__rawTag
 
     @property
     def tagType(self):
         """
-        Returns type of tag (e.g.: 0x0800 = round tag, 0x0300 = rectangle tag).
+        Returns type of read tag.
         
         @return hex (2 bytes)
         """
-        if ( self.__tag != None ):
-            return hex(int(self.__tag[0:4], 16))
-
+        
+        if ( self.__rawTag != None ):
+            return hex(int(self.__rawTag[0:4], 16))
+        
+        return None
+        
     @property
-    def checksum(self):
+    def tagId(self):
         """
-        Returns checksum of read tag ID.
+        Returns ID of read tag.
+        
+        @return string (10 bytes)
+        """
+        if ( self.__rawTag != None ):
+
+            ## Length of ID is 10 anyway 
+            return '%010i' % int(self.__rawTag[4:10], 16)
+
+        return None
+            
+    @property
+    def tagChecksum(self):
+        """
+        Returns checksum of read tag.
         
         @return hex (1 bytes)
         """
-        if ( self.__tag != None ):
-            return hex(int(self.__tag[10:12], 16))
+        
+        if ( self.__rawTag != None ):
+            return hex(int(self.__rawTag[10:12], 16))
 
-# Tests:
-if ( __name__ == '__main__' ):
-    
-    __rfid = PyRfid('/dev/ttyUSB0', 9600)
-
-    try:
-        print 'Waiting for tag...'
-
-        while ( __rfid.read() != True ):
-            pass
-
-        print 'ID:       '+ __rfid.tagId
-        print 'Type:     '+ __rfid.tagType
-        print 'Checksum: '+ __rfid.checksum
-
-    except Exception as e:
-        print '[Exception] '+ e.message
+        return None

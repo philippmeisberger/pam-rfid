@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
 """
-"" pamrfid
-"" Configuration check program.
-""
-"" Copyright 2014 Philipp Meisberger, Bastian Raschke.
-"" All rights reserved.
+pamrfid
+
+Copyright 2014 Philipp Meisberger, Bastian Raschke.
+All rights reserved.
 """
 
 import sys 
@@ -21,20 +20,21 @@ import hashlib
 
 
 class PamRfidCheck(object):
-
     """
-    "" The PyRfid instance
-    "" @var PyRfid __rfid
+    pamrfid simulation program.
+    
+    The PyRfid library instance
+    @var PyRfid __rfid
     """
+    
     __rfid = None
     
-    """
-    "" Constructor
-    ""
-    "" @return void
-    """
     def __init__(self):
+        """
+        Constructor
 
+        """
+    
         ## Tries to init config instance
         try:
             self.__config = Config('/etc/pamrfid.conf')
@@ -57,14 +57,14 @@ class PamRfidCheck(object):
             print '[Exception] The RFID sensor could not be initialized: ' + e.message
             exit(1)
 
-    """
-    "" Do a RFID check for a given user.
-    ""
-    "" @param string userName
-    "" @return boolean
-    """
     def checkUser(self, userName):
-
+        """
+        Do a RFID simulation for a given user.
+        
+        @param string userName
+        @return boolean
+        """
+    
         ## Checks if the the user was already added
         if ( self.__config.itemExists('Users', userName) == False ):
             print '[Error] The user "' + userName + '" is not added!'
@@ -83,12 +83,13 @@ class PamRfidCheck(object):
         try:
             print 'Waiting for tag...'
 
-            while ( self.__rfid.read() != True ):
-                pass
+            ## Read out tag data
+            if ( self.__rfid.readTag() != True ):
+                raise Exception('User aborted!')
 
             ## Calculates hash of tag ID
             print 'Calculating hash...'
-            tagHash = hashlib.sha256(tagId).hexdigest()
+            tagHash = hashlib.sha256(self.__rfid.tagId).hexdigest()
 
             print 'Checking if calculated hash matches stored hash...'
 
