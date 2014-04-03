@@ -11,9 +11,10 @@ Copyright 2014 Philipp Meisberger (PM Code Works).
 All rights reserved. 
 """
 
-import utilities
 import serial
 import os
+import utilities
+
 
 class PyRfid(object):
     """

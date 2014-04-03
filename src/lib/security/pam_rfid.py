@@ -81,13 +81,13 @@ def pam_sm_authenticate(pamh, flags, argv):
         logger.error(e.message, exc_info=False)
         return pamh.PAM_AUTH_ERR
 
-    ## Gets sensor connection values
+    ## Gets RFID sensor connection values
     port = config.readString('PyRfid', 'port')
-    baudRate = self.__config.readInteger('PyRfid', 'baudRate')
+    baudRate = config.readInteger('PyRfid', 'baudRate')
 
     ## Tries to establish connection
     try:
-        self.__rfid = PyRfid(port, baudRate)
+        rfid = PyRfid(port, baudRate)
 
     except:
         e = sys.exc_info()[1]
@@ -101,11 +101,11 @@ def pam_sm_authenticate(pamh, flags, argv):
     ## Tries to read RFID
     try:
         ## Read out tag data
-        if ( __rfid.readTag() != True ):
+        if ( rfid.readTag() != True ):
             raise Exception('User aborted!')
        
         ## Hashs read tag ID       
-        tagHash = hashlib.sha256(__rfid.tagId).hexdigest()
+        tagHash = hashlib.sha256(rfid.tagId).hexdigest()
            
         ## Checks if the read Hash matches the stored 
         if ( tagHash == expectedTagHash ):
@@ -113,7 +113,7 @@ def pam_sm_authenticate(pamh, flags, argv):
             pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Access granted!'))
             return pamh.PAM_SUCCESS
         else:
-            logger.info('The found match is not assigned to user!')
+            logger.info('The found match is not assigned to user "' + userName + '"!')
             pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Access denied!'))
             return pamh.PAM_AUTH_ERR
 

@@ -71,7 +71,7 @@ class PamRfid(object):
         """
         
         answer = raw_input(question + ' (Y/n)')
-        return ( answer not in ['y', 'Y', ''] )
+        return ( answer in ['y', 'Y', ''] )
 
     def addUser(self, userName):
         """
