@@ -37,15 +37,14 @@ class PyRfid(object):
     __serial = None
     __tag = None
     
-    """
-    "" Constructor
-    ""
-    "" @param string port
-    "" @param integer baudRate
-    "" @return void
-    """
     def __init__(self, port = '/dev/ttyUSB0', baudRate = 9600):
-
+        """
+        Constructor
+        
+        @param string port
+        @param integer baudRate
+        """
+        
         ## Validates port
         if ( os.path.exists(port) == False ):
             raise Exception('The RFID sensor port "' + port + '" was not found!')
@@ -63,7 +62,7 @@ class PyRfid(object):
         if ( self.__serial != None and self.__serial.isOpen() == True ):
             self.__serial.close()
     
-    def read(self):
+    def __read(self):
         """
         Reads the complete tag and returns status.
         
@@ -72,7 +71,7 @@ class PyRfid(object):
         
         self.__tag = None
         tag = ''
-        checksum = 0
+        calculatedChecksum = 0
         receivedPacketData = []
         index = 0
 
@@ -84,57 +83,57 @@ class PyRfid(object):
             ## Collects RFID data
             if ( len(receivedFragment) != 0 ):
 
-                ## Cuts start and stop bytes
-                if ( index > 0 and index < 13):
+                ## Start and stop bytes are string encoded and must be byte encoded
+                if ( index == 0 or index == 13):
+                    receivedFragment = utilities.stringToByte(receivedFragment)
+                else:
                     tag += receivedFragment
-                    
-                #print receivedFragment
-                
-                ## Coverts received string to byte for calculation
-                receivedFragment = utilities.stringToByte(receivedFragment)
+                    receivedFragment = int(receivedFragment, 16)
+
+                ## Collects RFID data (hexadecimal) 
                 receivedPacketData.append(receivedFragment)
                 index += 1              
-                print hex(receivedFragment)
 
             ## Packet completly received
             if ( index == 14 ):
             
                 ## Checks for invalid packet data
                 if ( receivedPacketData[0] != self.RFID_STARTCODE ) or ( receivedPacketData[13] != self.RFID_ENDCODE ): 
-                    raise Exception('Invalid packet data!')
-
-                print '-----------'
+                    raise Exception('Invalid start or stop bytes!')
                 
                 ## Calculates packet checksum
-                for i in range(1, 10, 2):
-                    byteToCheck = utilities.leftShift(receivedPacketData[i], 4)
+                for i in range(1, 11, 2):
 
-                    print 'byteToCheck1: '+ hex(byteToCheck)
-                    byteToCheck = byteToCheck | receivedPacketData[i+1]
-
-                    print 'byteToCheck2: '+ hex(receivedPacketData[i+1])
-
-                    byteToCheck = utilities.rightShift(byteToCheck, 4)
+                    byte = utilities.leftShift(receivedPacketData[i], 4)
+                    byte = byte | utilities.leftShift(receivedPacketData[i+1], 0)
+                    calculatedChecksum = calculatedChecksum ^ byte
                     
-                    print 'XOR: '+ hex(byteToCheck)                
-                    checksum = checksum ^ byteToCheck
-
                 ## Gets received packet checksum
                 receivedChecksum = utilities.leftShift(receivedPacketData[11], 4)
-                receivedChecksum = receivedChecksum | receivedPacketData[12]
-
-                print checksum
-                print receivedChecksum
+                receivedChecksum = receivedChecksum | utilities.leftShift(receivedPacketData[12], 0)
                 
                 ## Checks for wrong checksum
-                #if ( checksum != receivedChecksum ):
-                #    raise Exception('Calculated checksum is wrong!')
+                if ( calculatedChecksum != receivedChecksum ):
+                    raise Exception('Calculated checksum is wrong!')
 
                 ## Sets complete tag for other methods
                 self.__tag = tag
                 
                 return True
-    
+
+    def readTag(self):
+        """
+        Returns raw read tag.
+
+        @return string
+        """
+
+        while ( self.__read() != True ):
+            pass
+
+        return self.__tag
+            
+        
     @property
     def tagId(self):
         """
@@ -152,7 +151,7 @@ class PyRfid(object):
         """
         Returns type of tag (e.g.: 0x0800 = round tag, 0x0300 = rectangle tag).
         
-        @return hex (4 bytes)
+        @return hex (2 bytes)
         """
         if ( self.__tag != None ):
             return hex(int(self.__tag[0:4], 16))
@@ -162,25 +161,14 @@ class PyRfid(object):
         """
         Returns checksum of read tag ID.
         
-        @return hex (2 bytes)
+        @return hex (1 bytes)
         """
         if ( self.__tag != None ):
             return hex(int(self.__tag[10:12], 16))
 
-"""     
-# Checksumme berechnen
-for I in range(0, 9, 2):
-    Checksumme = Checksumme ^ (((int(ID[I], 16)) << 4) + int(ID[I+1], 16))
-Checksumme = hex(Checksumme)
-
-# Tag herausfiltern
-Tag = ((int(ID[1], 16)) << 8) + ((int(ID[2], 16)) << 4) + ((int(ID[3], 16)) << 0)
-Tag = hex(Tag)
-"""
-
 # Tests:
 if ( __name__ == '__main__' ):
-    """
+    
     __rfid = PyRfid('/dev/ttyUSB0', 9600)
 
     try:
@@ -189,22 +177,9 @@ if ( __name__ == '__main__' ):
         while ( __rfid.read() != True ):
             pass
 
-        print 'test: '+ __rfid.tagId
-        ## The new user information
-        #rfidHash = hashlib.sha256(__rfid.tagId).hexdigest() 
+        print 'ID:       '+ __rfid.tagId
+        print 'Type:     '+ __rfid.tagType
+        print 'Checksum: '+ __rfid.checksum
 
     except Exception as e:
         print '[Exception] '+ e.message
-    """
-    data = []
-    data.append('0')
-    data.append('F')
-    receivedFragment1 = utilities.stringToByte(data[0])
-    print '"0": '+ hex(receivedFragment1) +' (sollte 0 sein)'
-
-    receivedFragment2 = utilities.stringToByte(data[1])
-    print '"F": '+ hex(receivedFragment2) +' (sollte 15 sein)'
-
-    #print receivedFragment1 ^ receivedFragment2
-    print 'leftshift 4: '+ hex(utilities.leftShift(receivedFragment2, 4))
-    print 'leftshift 8: '+ hex(utilities.leftShift(receivedFragment2, 8))
