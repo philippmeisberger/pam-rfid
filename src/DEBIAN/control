@@ -1,5 +1,5 @@
 Package: pamrfid
-Version: 0.2
+Version: 0.3
 Section: admin
 Priority: extra
 Depends: python (<= 3.0), libpam-python, python-serial
