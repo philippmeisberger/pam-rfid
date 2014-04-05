@@ -105,7 +105,7 @@ def pam_sm_authenticate(pamh, flags, argv):
             raise Exception('User aborted!')
        
         ## Hashs read tag ID       
-        tagHash = hashlib.sha256(rfid.rawTag[0:10]).hexdigest()
+        tagHash = hashlib.sha256(rfid.rawTag).hexdigest()
            
         ## Checks if the read Hash matches the stored 
         if ( tagHash == expectedTagHash ):

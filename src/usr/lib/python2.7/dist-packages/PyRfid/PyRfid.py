@@ -4,8 +4,7 @@ PyRfid
 Requirements:
 ~# apt-get install python-serial
 
-@see http://www.seeedstudio.com/wiki/index.php?title=Electronic_brick_-_125Khz_RFID_Card_Reader#Demo_code
-@see https://github.com/johannrichard/SeeedRFIDLib/blob/master/SeeedRFIDLib.cpp
+@see http://www.instructables.com/id/A-Universal-RFID-Key/step2/Whats-stored-on-the-card/
 
 Copyright 2014 Philipp Meisberger (PM Code Works).
 All rights reserved. 
@@ -119,11 +118,11 @@ class PyRfid(object):
                 ## Sets complete tag for other methods
                 self.__rawTag = rawTag
                 
-                return True
-
+                return True        
+        
     def readTag(self):
         """
-        Reads out raw tag.
+        Reads the complete raw tag.
 
         @return boolean
         """
@@ -140,17 +139,17 @@ class PyRfid(object):
     @property
     def rawTag(self):
         """
-        Returns read raw tag.
+        Returns read raw tag in hexadecimal format "1A2B345C67" without checksum.
 
-        @return string
+        @return string (10 bytes)
         """
         
-        return self.__rawTag
+        return self.__rawTag[0:10]
 
     @property
     def tagType(self):
         """
-        Returns type of read tag.
+        Returns type of read tag (first 2 bytes).
         
         @return hex (2 bytes)
         """
@@ -159,25 +158,55 @@ class PyRfid(object):
             return hex(int(self.__rawTag[0:4], 16))
         
         return None
+                
+    @property
+    def tagTypeDecimal(self):
+        """
+        Returns type of read tag (first byte).
+        
+        @return hex (1 bytes)
+        """
+        
+        if ( self.__rawTag != None ):
+            return hex(int(self.__rawTag[0:2], 16))
+        
+        return None
         
     @property
     def tagId(self):
         """
-        Returns ID of read tag.
+        Returns ID of read tag in decimal format "0001234567".
         
         @return string (10 bytes)
         """
+
         if ( self.__rawTag != None ):
 
             ## Length of ID is 10 anyway 
             return '%010i' % int(self.__rawTag[4:10], 16)
 
         return None
+
+    @property
+    def tagIdDecimal(self):
+        """
+        Returns ID of read tag in decimal format "123,45678".
+        
+        @return string (9 bytes)
+        """
+
+        if ( self.__rawTag != None ):
+            pre = int(self.__rawTag[2:6], 16)
+            post = int(self.__rawTag[6:10], 16)
+            tagId = str(pre) +'.'+ str(post)            
+            return '%3.5f' % float(tagId)
+
+        return None
             
     @property
     def tagChecksum(self):
         """
-        Returns checksum of read tag.
+        Returns checksum of read tag (last byte).
         
         @return hex (1 bytes)
         """

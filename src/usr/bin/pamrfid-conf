@@ -105,7 +105,7 @@ class PamRfid(object):
                 raise Exception('User aborted!')
             
             ## Calculates hash of tag type + ID
-            tagHash = hashlib.sha256(self.__rfid.rawTag[0:10]).hexdigest()
+            tagHash = hashlib.sha256(self.__rfid.rawTag).hexdigest()
 
             ## Adds user to configuration file
             self.__config.writeString('Users', userName, tagHash)               

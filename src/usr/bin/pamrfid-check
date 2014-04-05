@@ -87,16 +87,16 @@ class PamRfidCheck(object):
             if ( self.__rfid.readTag() != True ):
                 raise Exception('User aborted!')
 
-            ## Prints out additional information
+            ## Show additional information
             print '------------------------'
-            print 'Tag type:     ' + self.__rfid.tagType
             print 'Tag ID:       ' + self.__rfid.tagId
+            print 'Tag type:     ' + self.__rfid.tagType           
             print 'Tag Checksum: ' + self.__rfid.tagChecksum
             print '------------------------'
             
             ## Calculates hash of tag ID
             print 'Calculating hash...'
-            tagHash = hashlib.sha256(self.__rfid.rawTag[0:10]).hexdigest()
+            tagHash = hashlib.sha256(self.__rfid.rawTag).hexdigest()
 
             print 'Checking if calculated hash matches stored hash...'
 
