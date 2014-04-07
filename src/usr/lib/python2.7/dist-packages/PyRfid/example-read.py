@@ -7,7 +7,7 @@ All rights reserved.
 """
 
 from PyRfid import *
-
+import sys
    
 rfid = PyRfid('/dev/ttyUSB0', 9600)
 
@@ -29,4 +29,4 @@ try:
     print 'Type:     '+ rfid.tagTypeDecimal
 
 except Exception as e:
-    print '[Exception] '+ e.message
+    sys.err.write('[Exception] '+ e.message)

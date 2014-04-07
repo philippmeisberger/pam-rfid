@@ -17,7 +17,7 @@ import utilities
 
 class PyRfid(object):
     """
-    A python written library for an 125kHz RFID reader.
+    A python written library for a 125kHz RFID reader.
 
     Flag for RFID connection start.
     @var hex RFID_STARTCODE
@@ -118,7 +118,9 @@ class PyRfid(object):
                 ## Sets complete tag for other methods
                 self.__rawTag = rawTag
                 
-                return True        
+                return True
+
+        return False
         
     def readTag(self):
         """
@@ -149,9 +151,9 @@ class PyRfid(object):
     @property
     def tagType(self):
         """
-        Returns type of read tag (first 2 bytes).
+        Returns type of read tag (first 2 bytes) as Hexadecimal.
         
-        @return hex (2 bytes)
+        @return string (2 bytes)
         """
         
         if ( self.__rawTag != None ):
@@ -162,9 +164,9 @@ class PyRfid(object):
     @property
     def tagTypeDecimal(self):
         """
-        Returns type of read tag (first byte).
+        Returns type of read tag (first byte) as Hexadecimal.
         
-        @return hex (1 bytes)
+        @return string (1 bytes)
         """
         
         if ( self.__rawTag != None ):
@@ -206,9 +208,9 @@ class PyRfid(object):
     @property
     def tagChecksum(self):
         """
-        Returns checksum of read tag (last byte).
+        Returns checksum of read tag (last byte) as Hexadecimal.
         
-        @return hex (1 bytes)
+        @return string (1 bytes)
         """
         
         if ( self.__rawTag != None ):
