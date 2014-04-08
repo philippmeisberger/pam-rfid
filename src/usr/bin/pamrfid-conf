@@ -16,6 +16,7 @@ from pamrfid.Config import *
 from PyRfid.PyRfid import *
 
 import hashlib
+import uuid
 import argparse
 import os
 
@@ -46,7 +47,7 @@ class PamRfid(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.err.write('[Exception] ' + e.message)
+            sys.stderr.write('[Exception] ' + e.message)
             exit(1)
 
         ## Gets connection values
@@ -59,7 +60,7 @@ class PamRfid(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.err.write('[Exception] The RFID sensor could not be initialized: ' + e.message)
+            sys.stderr.write('[Exception] The RFID sensor could not be initialized: ' + e.message)
             exit(1)
     
     def __showConfirmationDialog(self, question = ''):
@@ -83,12 +84,12 @@ class PamRfid(object):
         
         ## Checks if user is root
         if ( os.geteuid() != 0 ):
-            sys.err.write('[Error] You need to have root privileges to add a user!')
+            sys.stderr.write('[Error] You need to have root privileges to add a user!')
             return False
 
         ## Checks if the the user is not already added
         if ( self.__config.itemExists('Users', userName) == True ):
-            sys.err.write('[Error] The user "' + userName + '" is already added!')
+            sys.stderr.write('[Error] The user "' + userName + '" is already added!')
             return False
 
         ## Confirmation dialog
@@ -103,12 +104,21 @@ class PamRfid(object):
             ## Read out tag data
             if ( self.__rfid.readTag() != True ):
                 raise Exception('User aborted!')
-            
-            ## Calculates hash of tag type + ID
-            tagHash = hashlib.sha256(self.__rfid.rawTag).hexdigest()
 
+            ## Generates salt
+            salt = uuid.uuid4().hex
+            
+            ## Calculates salted hash of tag
+            tagHash = hashlib.sha256(salt.encode() + self.__rfid.rawTag.encode()).hexdigest()
+
+            ## The new user information list
+            userData = (
+                salt,
+                tagHash,
+            )
+            
             ## Adds user to configuration file
-            self.__config.writeString('Users', userName, tagHash)               
+            self.__config.writeList('Users', userName, userData)               
                 
             if ( self.__config.save() == True ):
                 print 'The user "' + userName + '" has been added successfully!'
@@ -117,7 +127,7 @@ class PamRfid(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.err.write('[Exception] Error while adding user: ' + e.message)
+            sys.stderr.write('[Exception] Error while adding user: ' + e.message)
             return False
 
         return True
@@ -155,7 +165,7 @@ class PamRfid(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.err.write('[Exception] Error while removing user: ' + e.message)
+            sys.stderr.write('[Exception] Error while removing user: ' + e.message)
             return False
 
         return True

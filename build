@@ -8,8 +8,8 @@ fi
 cp -r ./src/ ./src_temp/
 chown 1000:1000 ./src_temp/var/log/pamrfid.log
 
-dpkg --build ./src_temp/ ./pamrfid_0.3.deb
+dpkg --build ./src_temp/ ./pamrfid_0.4.deb
 
 rm -R ./src_temp/
 
-chown 1000:1000 ./pamrfid_0.3.deb
+chown 1000:1000 ./pamrfid_0.4.deb

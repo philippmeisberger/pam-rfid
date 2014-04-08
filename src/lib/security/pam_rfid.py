@@ -15,6 +15,7 @@ from pamrfid.Config import *
 from PyRfid.PyRfid import *
 
 import hashlib
+import uuid
 import logging
 import os
 
@@ -74,7 +75,9 @@ def pam_sm_authenticate(pamh, flags, argv):
 
     ## Tries to get user information
     try:
-        expectedTagHash = config.readString('Users', userName)
+        userData = config.readList('Users', userName)
+        salt = userData[0]
+        expectedTagHash = userData[1]
 
     except:
         e = sys.exc_info()[1]
@@ -104,8 +107,8 @@ def pam_sm_authenticate(pamh, flags, argv):
         if ( rfid.readTag() != True ):
             raise Exception('User aborted!')
        
-        ## Hashs read tag ID       
-        tagHash = hashlib.sha256(rfid.rawTag).hexdigest()
+        ## Hashs read tag       
+        tagHash = hashlib.sha256(salt.encode() + rfid.rawTag.encode()).hexdigest()
            
         ## Checks if the read Hash matches the stored 
         if ( tagHash == expectedTagHash ):
