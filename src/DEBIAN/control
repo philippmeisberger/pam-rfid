@@ -2,7 +2,7 @@ Package: pamrfid
 Version: 0.4
 Section: admin
 Priority: extra
-Depends: python (<= 3.0), libpam-python, python-serial
+Depends: python (>= 2.7), libpam-python, pyrfid
 Architecture: all
 Installed-Size: 30
 Maintainer: Philipp Meisberger <team@pm-codeworks.de>

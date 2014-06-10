@@ -68,7 +68,8 @@ class PyRfid(object):
         
         @return boolean
         """
-        
+
+        lastTag = self.__rawTag
         self.__rawTag = None
         rawTag = ''
         calculatedChecksum = 0
@@ -92,8 +93,8 @@ class PyRfid(object):
 
                 ## Collects RFID data (hexadecimal) 
                 receivedPacketData.append(receivedFragment)
-                index += 1              
-
+                index += 1
+            
             ## Packet completly received
             if ( index == 14 ):
             
@@ -117,8 +118,15 @@ class PyRfid(object):
 
                 ## Sets complete tag for other methods
                 self.__rawTag = rawTag
-                
-                return True
+
+                if ( lastTag != self.__rawTag ):
+                    return True
+                else:
+                    self.__rawTag = None
+                    rawTag = ''
+                    calculatedChecksum = 0
+                    receivedPacketData = []
+                    index = 0
 
         return False
         
@@ -128,15 +136,17 @@ class PyRfid(object):
 
         @return boolean
         """
+
+        read = False
         
-        try:
-            while ( self.__read() != True ):
-                pass
+        #try:
+        ## Reads the complete tag
+        read = self.__read()
 
-        except KeyboardInterrupt:
-            return False
+        #except KeyboardInterrupt:
+        #    return False
 
-        return True
+        return read
             
     @property
     def rawTag(self):

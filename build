@@ -1,15 +1,20 @@
 #!/bin/sh
 
 if ( test "$USER" != "root" ); then
-    echo "This script must executed as root!"
-    exit 1
+  echo "This script must executed as root!"
+  exit 1
 fi
 
-cp -r ./src/ ./src_temp/
-chown 1000:1000 ./src_temp/var/log/pamrfid.log
+PACKAGE=pamrfid
+DIR=src
 
-dpkg --build ./src_temp/ ./pamrfid_0.4.deb
+if ( ! test -d "$DIR" ); then
+  echo "The directory does not exists!"
+  exit 1
+fi
 
-rm -R ./src_temp/
+cp -R "$DIR" "${PACKAGE}_temp/"
+dpkg --build "${PACKAGE}_temp/" "${PACKAGE}.deb"
+chown 1000:1000 "${PACKAGE}.deb"
 
-chown 1000:1000 ./pamrfid_0.4.deb
+rm -R "${PACKAGE}_temp/"
