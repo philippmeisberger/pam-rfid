@@ -2,10 +2,11 @@ Package: pamrfid
 Version: 0.4
 Section: admin
 Priority: extra
-Depends: python (>= 2.7), libpam-python, pyrfid
+Depends: python (>= 2.7), libpam-python, python-rfid
 Architecture: all
 Installed-Size: 30
 Maintainer: Philipp Meisberger <team@pm-codeworks.de>
 Homepage: www.pm-codeworks.de/pamrfid.html
-Description: Pluggable Authentication Module for hardware authentication via RFID.
- A UART compatible RFID reader sensor is required for this module. 
+Description: Pluggable Authentication Module (PAM) for hardware authentication via RFID.
+  .
+  Note: A 125kHz UART compatible RFID reader is required! 
