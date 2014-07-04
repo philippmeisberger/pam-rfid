@@ -6,4 +6,4 @@ pam-auth-update --package --remove pamrfid
 ## Deletes compiled Python files before removing package
 find /usr/lib/pamrfid/ -type f -name *.pyc -exec rm {} \;
 
-exit $?
+exit "${?}"

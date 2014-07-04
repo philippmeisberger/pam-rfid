@@ -2,5 +2,4 @@
 
 ## Adds PAM configuration to "/etc/pam.d/common-auth":
 pam-auth-update --package pamrfid
-
-exit $?
+exit "${?}"
