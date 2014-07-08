@@ -47,7 +47,7 @@ class PamRfid(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] ' + e.message)
+            sys.stderr.write('[Exception] ' + e.message + '\n')
             exit(1)
 
         ## Gets connection values
@@ -60,7 +60,7 @@ class PamRfid(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] The RFID sensor could not be initialized: ' + e.message)
+            sys.stderr.write('[Exception] The RFID sensor could not be initialized: ' + e.message + '\n')
             exit(1)
     
     def __showConfirmationDialog(self, question = ''):
@@ -84,12 +84,12 @@ class PamRfid(object):
         
         ## Checks if user is root
         if ( os.geteuid() != 0 ):
-            sys.stderr.write('[Error] You need to have root privileges to add a user!')
+            sys.stderr.write('[Error] You need to have root privileges to add a user!\n')
             return False
 
         ## Checks if the the user is not already added
         if ( self.__config.itemExists('Users', userName) == True ):
-            sys.stderr.write('[Error] The user "' + userName + '" is already added!')
+            sys.stderr.write('[Error] The user "' + userName + '" is already added!\n')
             return False
 
         ## Confirmation dialog
@@ -127,7 +127,7 @@ class PamRfid(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] Error while adding user: ' + e.message)
+            sys.stderr.write('[Exception] Error while adding user: ' + e.message + '\n')
             return False
 
         return True
@@ -165,7 +165,7 @@ class PamRfid(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] Error while removing user: ' + e.message)
+            sys.stderr.write('[Exception] Error while removing user: ' + e.message + '\n')
             return False
 
         return True

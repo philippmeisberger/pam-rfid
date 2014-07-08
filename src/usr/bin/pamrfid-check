@@ -42,7 +42,7 @@ class PamRfidCheck(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] ' + e.message)
+            sys.stderr.write('[Exception] ' + e.message + '\n')
             exit(1)
 
         ## Gets connection values
@@ -55,7 +55,7 @@ class PamRfidCheck(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] The RFID sensor could not be initialized: ' + e.message)
+            sys.stderr.write('[Exception] The RFID sensor could not be initialized: ' + e.message + '\n')
             exit(1)
 
     def checkUser(self, userName):
@@ -68,7 +68,7 @@ class PamRfidCheck(object):
     
         ## Checks if the the user was already added
         if ( self.__config.itemExists('Users', userName) == False ):
-            sys.stderr.write('[Error] The user "' + userName + '" is not added!')
+            sys.stderr.write('[Error] The user "' + userName + '" is not added!\n')
             return False
 
         ## Tries to get user information
@@ -79,7 +79,7 @@ class PamRfidCheck(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] ' + e.message)
+            sys.stderr.write('[Exception] ' + e.message +'\n')
             return False
 
         ## Tries to check RFID
@@ -111,7 +111,7 @@ class PamRfidCheck(object):
 
         except:
             e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] Check for user "' + userName + '" failed: ' + e.message)
+            sys.stderr.write('[Exception] Check for user "' + userName + '" failed: ' + e.message + '\n')
             return False
 
         return True
