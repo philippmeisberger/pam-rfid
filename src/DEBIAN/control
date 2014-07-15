@@ -1,5 +1,5 @@
 Package: pamrfid
-Version: 0.5
+Version: 1.0
 Section: admin
 Priority: extra
 Depends: python (>= 2.7), libpam-python, python-serial, python-rfid
