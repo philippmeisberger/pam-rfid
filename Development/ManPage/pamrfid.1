@@ -4,10 +4,10 @@
 \fBpamrfid\fP - Pluggable Authentication Module (PAM) for hardware authentication via RFID
 
 .SH DESCRIPTION
-\fBpamrfid\fR is a Python written Pluggable Authentication Module (PAM) which uses pam_python to work with operating system like a native C module. It allows hardware (passwordless) authentication with a UART compatible RFID sensor. The connection to the RFID sensor will be established via Pyserial. A default USB TTL converter can be used to connect the device.
+\fBpamrfid\fR is a Python written Pluggable Authentication Module (PAM) which uses pam_python to work with operating system like a native C module. It allows hardware (passwordless) authentication with a UART compatible RFID sensor using the EM4100 protocol. The connection to the RFID sensor will be established via Pyserial. A default USB TTL converter can be used to connect the device. PAM RFID was developed with the RDM6300 RFID reader.
 .br
 
-For default the standard passwort authentication is set as fallback in case no RFID sensor is connected. The module has to be configured by the \fBpamrfid-conf\fR program. It allows (as root) to bind or unbind users to \fBpamrfid\fR. To simulate an authentication process the \fBpamrfid-check\fR program can be used.
+For default the standard password authentication is set as fallback in case no RFID sensor is connected. The module has to be configured by the \fBpamrfid-conf\fR program. It allows (as root) to bind or unbind users to \fBpamrfid\fR. To simulate an authentication process the \fBpamrfid-check\fR program can be used.
 
 .SH "SEE ALSO"
 \fBpamrfid-conf\fR(1), \fBpamrfid-check\fR(1)
