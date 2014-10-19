@@ -1,10 +1,5 @@
 #!/bin/sh
 
-if ( test "$USER" != "root" ); then
-  echo "This script must executed as root!"
-  exit 1
-fi
-
 PACKAGE=pamrfid
 DIR=src
 
