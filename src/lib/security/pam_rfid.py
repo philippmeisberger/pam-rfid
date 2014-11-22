@@ -3,10 +3,10 @@ pamrfid
 PAM implementation.
 
 Copyright 2014 Philipp Meisberger, Bastian Raschke.
-All rights reserved. 
+All rights reserved.
 """
 
-import sys 
+import sys
 sys.path.append('/usr/lib')
 
 from pamrfid.version import VERSION
@@ -19,15 +19,19 @@ import uuid
 import logging
 import os
 
-## Configures logger
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
-## Creates and adds a file handler to logger
-fileHandler = logging.FileHandler('/var/log/pamrfid.log')
-fileHandler.setLevel(logging.INFO)
-fileHandler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
-logger.addHandler(fileHandler)
+def auth_log(message, priority=syslog.LOG_INFO):
+    """
+    Sends errors to default authentication log
+
+    @param string message
+    @param integer priority
+    @return void
+    """
+
+    syslog.openlog(facility=syslog.LOG_AUTH)
+    syslog.syslog(priority, 'pamrfid: ' + message)
+    syslog.closelog()
 
 
 def pam_sm_authenticate(pamh, flags, argv):
@@ -46,31 +50,29 @@ def pam_sm_authenticate(pamh, flags, argv):
 
         ## Fallback
         if ( userName == None ):
-            userName = pamh.get_user()            
+            userName = pamh.get_user()
 
-        ## Be sure the user is set 
+        ## Be sure the user is set
         if ( userName == None ):
             raise Exception('The user is not known!')
 
-    except:
-        e = sys.exc_info()[1]
-        logger.error(e.message, exc_info=True)
+    except Exception as e:
+        auth_log(e.message, syslog.LOG_CRIT)
         return pamh.PAM_USER_UNKNOWN
 
     ## Tries to init Config
     try:
         config = Config('/etc/pamrfid.conf')
 
-    except:
-        e = sys.exc_info()[1]
-        logger.error(e.message, exc_info=True)
+    except Exception as e:
+        auth_log(e.message, syslog.LOG_CRIT)
         return pamh.PAM_IGNORE
 
-    logger.info('The user "' + userName + '" is asking for permission for service "' + str(pamh.service) + '".')
+    auth_log('The user "' + userName + '" is asking for permission for service "' + str(pamh.service) + '".', syslog.LOG_DEBUG)
 
     ## Checks if the the user was added in configuration
     if ( config.itemExists('Users', userName) == False ):
-        logger.error('The user was not added!')
+        auth_log('The user was not added!', syslog.LOG_ERR)
         return pamh.PAM_IGNORE
 
     ## Tries to get user information
@@ -79,9 +81,8 @@ def pam_sm_authenticate(pamh, flags, argv):
         salt = userData[0]
         expectedTagHash = userData[1]
 
-    except:
-        e = sys.exc_info()[1]
-        logger.error(e.message, exc_info=False)
+    except Exception as e:
+        auth_log(e.message, syslog.LOG_CRIT)
         return pamh.PAM_AUTH_ERR
 
     ## Gets RFID sensor connection values
@@ -92,12 +93,11 @@ def pam_sm_authenticate(pamh, flags, argv):
     try:
         rfid = PyRfid(port, baudRate)
 
-    except:
-        e = sys.exc_info()[1]
-        logger.error(e.message, exc_info=True)
+    except Exception as e:
+        auth_log(e.message, syslog.LOG_CRIT)
         pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Sensor initialization failed!'))
-        return pamh.PAM_IGNORE        
-        
+        return pamh.PAM_IGNORE
+
     msg = pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Waiting for tag...')
     pamh.conversation(msg)
 
@@ -106,32 +106,84 @@ def pam_sm_authenticate(pamh, flags, argv):
         ## Read out tag data
         if ( rfid.readTag() != True ):
             raise Exception('User aborted!')
-       
-        ## Hashs read tag       
+
+        ## Hashs read tag
         tagHash = hashlib.sha256(salt.encode() + rfid.rawTag.encode()).hexdigest()
-           
-        ## Checks if the read Hash matches the stored 
+
+        ## Checks if the read Hash matches the stored
         if ( tagHash == expectedTagHash ):
-            logger.info('Access granted!')
+            auth_log('Access granted!')
             pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Access granted!'))
             return pamh.PAM_SUCCESS
         else:
-            logger.info('The found match is not assigned to user "' + userName + '"!')
+            auth_log('The found match is not assigned to user "' + userName + '"!', syslog.LOG_WARNING))
             pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Access denied!'))
             return pamh.PAM_AUTH_ERR
 
-    except:
-        e = sys.exc_info()[1]
-        logger.error('RFID read failed!', exc_info=True)
+    except Exception as e:
+        auth_log('RFID read failed!' + e.message, syslog.LOG_CRIT)
         pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Access denied!'))
         return pamh.PAM_AUTH_ERR
 
     ## Denies for default
     return pamh.PAM_AUTH_ERR
 
+
 def pam_sm_setcred(pamh, flags, argv):
     """
     PAM service function to alter credentials.
+
+    @param pamh
+    @param flags
+    @param argv
+    @return integer
+    """
+
+    return pamh.PAM_SUCCESS
+
+
+def pam_sm_acct_mgmt(pamh, flags, argv):
+    """
+    PAM service function for account management.
+
+    @param pamh
+    @param flags
+    @param argv
+    @return integer
+    """
+
+    return pamh.PAM_SUCCESS
+
+
+def pam_sm_open_session(pamh, flags, argv):
+    """
+    PAM service function to start session.
+
+    @param pamh
+    @param flags
+    @param argv
+    @return integer
+    """
+
+    return pamh.PAM_SUCCESS
+
+
+def pam_sm_close_session(pamh, flags, argv):
+    """
+    PAM service function to terminate session.
+
+    @param pamh
+    @param flags
+    @param argv
+    @return integer
+    """
+
+    return pamh.PAM_SUCCESS
+
+
+def pam_sm_chauthtok(pamh, flags, argv):
+    """
+    PAM service function for authentication token management.
 
     @param pamh
     @param flags

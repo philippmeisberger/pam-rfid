@@ -7,7 +7,7 @@ Copyright 2014 Philipp Meisberger, Bastian Raschke.
 All rights reserved.
 """
 
-import sys 
+import sys
 sys.path.append('/usr/lib')
 
 from pamrfid.version import VERSION
@@ -24,30 +24,29 @@ import os
 class PamRfid(object):
     """
     pamrfid configuration program.
-    
+
     The PyRfid library instance
     @var PyRfid __rfid
 
     Config instance
     @var Config __config
     """
-    
+
     __rfid = None
     __config = None
-    
+
     def __init__(self):
         """
         Constructor
 
         """
-        
+
         ## Tries to init config instance
         try:
             self.__config = Config('/etc/pamrfid.conf')
 
-        except:
-            e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] ' + e.message + '\n')
+        except Exception as e:
+            print '[Exception] ' + e.message
             exit(1)
 
         ## Gets connection values
@@ -58,38 +57,37 @@ class PamRfid(object):
         try:
             self.__rfid = PyRfid(port, baudRate)
 
-        except:
-            e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] The RFID sensor could not be initialized: ' + e.message + '\n')
+        except Exception as e:
+            print '[Exception] The RFID sensor could not be initialized: ' + e.message
             exit(1)
-    
+
     def __showConfirmationDialog(self, question = ''):
         """
         Shows confirmation dialog.
-        
+
         @param string question
         @return boolean
         """
-        
+
         answer = raw_input(question + ' (Y/n)')
         return ( answer in ['y', 'Y', ''] )
 
     def addUser(self, userName):
         """
         Enrolls new RFID tag and adds user to pamrfid.
-        
+
         @param string userName
         @return boolean
         """
-        
+
         ## Checks if user is root
         if ( os.geteuid() != 0 ):
-            sys.stderr.write('[Error] You need to have root privileges to add a user!\n')
+            print '[Error] You need to have root privileges to add a user!'
             return False
 
         ## Checks if the the user is not already added
         if ( self.__config.itemExists('Users', userName) == True ):
-            sys.stderr.write('[Error] The user "' + userName + '" is already added!\n')
+            print '[Error] The user "' + userName + '" is already added!'
             return False
 
         ## Confirmation dialog
@@ -107,7 +105,7 @@ class PamRfid(object):
 
             ## Generates salt
             salt = uuid.uuid4().hex
-            
+
             ## Calculates salted hash of tag
             tagHash = hashlib.sha256(salt.encode() + self.__rfid.rawTag.encode()).hexdigest()
 
@@ -116,18 +114,17 @@ class PamRfid(object):
                 salt,
                 tagHash,
             )
-            
+
             ## Adds user to configuration file
-            self.__config.writeList('Users', userName, userData)               
-                
+            self.__config.writeList('Users', userName, userData)
+
             if ( self.__config.save() == True ):
                 print 'The user "' + userName + '" has been added successfully!'
             else:
                 raise Exception('The configuration could not be written!')
 
-        except:
-            e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] Error while adding user: ' + e.message + '\n')
+        except Exception as e:
+            print '[Exception] Error while adding user: ' + e.message
             return False
 
         return True
@@ -135,11 +132,11 @@ class PamRfid(object):
     def removeUser(self, userName):
         """
         Removes RFID tag from configuration.
-        
+
         @param string userName
         @return boolean
         """
-        
+
         ## Checks if user is root
         if ( os.geteuid() != 0 ):
             print '[Error] You need to have root privileges to add a user!'
@@ -163,17 +160,16 @@ class PamRfid(object):
             else:
                 raise Exception('The configuration file could not be written!')
 
-        except:
-            e = sys.exc_info()[1]
-            sys.stderr.write('[Exception] Error while removing user: ' + e.message + '\n')
+        except Exception as e:
+            print '[Exception] Error while removing user: ' + e.message
             return False
 
         return True
 
 
 if ( __name__ == '__main__' ):
- 
-    parser = argparse.ArgumentParser(description = 'pamrfid configuration program:')
+
+    parser = argparse.ArgumentParser(description='pamrfid configuration program:')
 
     parser.add_argument('--add-user', metavar='NAME', help='Adds a new user.')
     parser.add_argument('--remove-user', metavar='NAME', help='Removes a user.')

@@ -1,0 +1,15 @@
+pamrfid (1.1) stable; urgency=low
+
+  * Minor Release
+  * Renamed package to libpam-fingerprint
+  * Improved exception handling
+  * Removed logging to /var/log/pamfingerprint.log
+    - Now logging to default authentication log
+
+ -- Philipp Meisberger <team@pm-codeworks.de>  Sat, 22 Nov 2014 13:15:12 +0200
+
+pamrfid (1.0) unstable; urgency=low
+
+  * Initial release
+
+ -- Philipp Meisberger <team@pm-codeworks.de>  Tue, 15 Jul 2014 16:11:15 +0200
