@@ -1,5 +1,5 @@
 #!/bin/sh
 
 ## Adds PAM configuration to "/etc/pam.d/common-auth":
-pam-auth-update --package pamrfid
+pam-auth-update --package rfid
 exit "${?}"

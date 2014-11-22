@@ -2,7 +2,7 @@
 
 if ( test "${1}" = "remove" ); then
     ## Removes PAM configuration in "/etc/pam.d/common-auth":
-    pam-auth-update --package --remove pamrfid
+    pam-auth-update --package --remove rfid
 fi
 
 ## Deletes compiled Python files before removing package
