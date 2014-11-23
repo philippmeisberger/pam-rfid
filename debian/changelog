@@ -1,4 +1,4 @@
-pamrfid (1.1) stable; urgency=low
+libpam-rfid (1.1) stable; urgency=low
 
   * Minor Release
   * Renamed package to libpam-fingerprint
@@ -8,7 +8,7 @@ pamrfid (1.1) stable; urgency=low
 
  -- Philipp Meisberger <team@pm-codeworks.de>  Sat, 22 Nov 2014 13:15:12 +0200
 
-pamrfid (1.0) unstable; urgency=low
+libpam-rfid (1.0) unstable; urgency=low
 
   * Initial release
 
