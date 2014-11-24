@@ -16,7 +16,7 @@ from PyRfid.PyRfid import *
 
 import hashlib
 import uuid
-import logging
+import syslog
 import os
 
 
@@ -116,7 +116,7 @@ def pam_sm_authenticate(pamh, flags, argv):
             pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Access granted!'))
             return pamh.PAM_SUCCESS
         else:
-            auth_log('The found match is not assigned to user "' + userName + '"!', syslog.LOG_WARNING))
+            auth_log('The found match is not assigned to user "' + userName + '"!', syslog.LOG_WARNING)
             pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Access denied!'))
             return pamh.PAM_AUTH_ERR
 
