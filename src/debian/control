@@ -2,14 +2,14 @@ Source: libpam-rfid
 Maintainer: Philipp Meisberger <team@pm-codeworks.de>
 Section: admin
 Priority: optional
-Standards-Version: 1.1
-Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.4
+Build-Depends: debhelper (>= 9), python (>= 2.7), python-setuptools 
 
 Package: libpam-rfid
 Provides: pamrfid
 Replaces: pamrfid
 Conflicts: pamrfid
-Depends: python (>= 2.7), libpam-python, python-rfid
+Depends: python (>= 2.7), libpam-python, python-rfid, ${python:Depends}, ${misc:Depends}
 Architecture: all
 Homepage: http://www.pm-codeworks.de/pamrfid.html
 Description: Pluggable Authentication Module (PAM) for hardware authentication via RFID

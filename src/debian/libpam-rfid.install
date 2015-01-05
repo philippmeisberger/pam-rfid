@@ -1,0 +1,6 @@
+debian/pam-auth-update/rfid usr/share/pam-configs
+debian/bash_completion.d/pamrfid etc/bash_completion.d
+files/pam_rfid.py lib/security
+files/pamrfid-conf usr/bin
+files/pamrfid-check usr/bin
+files/pamrfid.conf etc

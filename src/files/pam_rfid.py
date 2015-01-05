@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 pamrfid
 PAM implementation.
@@ -6,18 +9,13 @@ Copyright 2014 Philipp Meisberger, Bastian Raschke.
 All rights reserved.
 """
 
-import sys
-sys.path.append('/usr/lib')
-
-from pamrfid.version import VERSION
-from pamrfid.Config import *
-
-from PyRfid.PyRfid import *
-
 import hashlib
 import uuid
 import syslog
 import os
+import pamrfid.Config as Config
+import pamrfid.__version as VERSION
+import PyRfid.PyRfid as PyRfid
 
 
 def auth_log(message, priority=syslog.LOG_INFO):
