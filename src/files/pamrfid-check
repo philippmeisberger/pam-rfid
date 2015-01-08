@@ -37,7 +37,7 @@ class PamRfidCheck(object):
             self.__config = Config('/etc/pamrfid.conf')
 
         except Exception as e:
-            print('[Exception] ' + e)
+            print('[Exception] ' + str(e))
             exit(1)
 
         ## Gets connection values
@@ -49,7 +49,7 @@ class PamRfidCheck(object):
             self.__rfid = PyRfid(port, baudRate)
 
         except Exception as e:
-            print('[Exception] The RFID sensor could not be initialized: ' + e)
+            print('[Exception] The RFID sensor could not be initialized: ' + str(e))
             exit(1)
 
 
@@ -73,7 +73,7 @@ class PamRfidCheck(object):
             expectedTagHash = userData[1]
 
         except Exception as e:
-            print('[Exception] ' + e)
+            print('[Exception] ' + str(e))
             return False
 
         ## Tries to check RFID
@@ -104,7 +104,7 @@ class PamRfidCheck(object):
                 raise Exception('The found tag is not assigned to user!')
 
         except Exception as e:
-            print('[Exception] Check for user "' + userName + '" failed: ' + e)
+            print('[Exception] Check for user "' + userName + '" failed: ' + str(e))
             return False
 
         return True

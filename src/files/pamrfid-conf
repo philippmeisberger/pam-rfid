@@ -42,7 +42,7 @@ class PamRfid(object):
             self.__config = Config('/etc/pamrfid.conf')
 
         except Exception as e:
-            print('[Exception] ' + e)
+            print('[Exception] ' + str(e))
             exit(1)
 
         ## Gets connection values
@@ -54,7 +54,7 @@ class PamRfid(object):
             self.__rfid = PyRfid(port, baudRate)
 
         except Exception as e:
-            print('[Exception] The RFID sensor could not be initialized: ' + e)
+            print('[Exception] The RFID sensor could not be initialized: ' + str(e))
             exit(1)
 
     def __showConfirmationDialog(self, question = ''):
@@ -120,7 +120,7 @@ class PamRfid(object):
                 raise Exception('The configuration could not be written!')
 
         except Exception as e:
-            print('[Exception] Error while adding user: ' + e)
+            print('[Exception] Error while adding user: ' + str(e))
             return False
 
         return True
@@ -157,7 +157,7 @@ class PamRfid(object):
                 raise Exception('The configuration file could not be written!')
 
         except Exception as e:
-            print('[Exception] Error while removing user: ' + e)
+            print('[Exception] Error while removing user: ' + str(e))
             return False
 
         return True
