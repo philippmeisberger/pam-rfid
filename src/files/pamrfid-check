@@ -2,18 +2,18 @@
 # -*- coding: utf-8 -*-
 
 """
-pamrfid
+PAM RFID
 
-Copyright 2014 Philipp Meisberger, Bastian Raschke.
+Copyright 2015 Philipp Meisberger, Bastian Raschke.
 All rights reserved.
 """
 
 import argparse
 import hashlib
 import uuid
-import pamrfid.Config as Config
-import pamrfid.__version as VERSION
-import PyRfid.PyRfid as PyRfid
+from pamrfid import __version__ as VERSION
+from pamrfid.Config import Config
+from PyRfid.PyRfid import PyRfid
 
 
 class PamRfidCheck(object):
@@ -37,7 +37,7 @@ class PamRfidCheck(object):
             self.__config = Config('/etc/pamrfid.conf')
 
         except Exception as e:
-            print '[Exception] ' + e.message
+            print('[Exception] ' + e)
             exit(1)
 
         ## Gets connection values
@@ -49,7 +49,7 @@ class PamRfidCheck(object):
             self.__rfid = PyRfid(port, baudRate)
 
         except Exception as e:
-            print '[Exception] The RFID sensor could not be initialized: ' + e.message
+            print('[Exception] The RFID sensor could not be initialized: ' + e)
             exit(1)
 
 
@@ -63,7 +63,7 @@ class PamRfidCheck(object):
 
         ## Checks if the the user was already added
         if ( self.__config.itemExists('Users', userName) == False ):
-            print '[Error] The user "' + userName + '" is not added!'
+            print('[Error] The user "' + userName + '" is not added!')
             return False
 
         ## Tries to get user information
@@ -73,38 +73,38 @@ class PamRfidCheck(object):
             expectedTagHash = userData[1]
 
         except Exception as e:
-            print '[Exception] ' + e.message
+            print('[Exception] ' + e)
             return False
 
         ## Tries to check RFID
         try:
-            print 'Waiting for tag...'
+            print('Waiting for tag...')
 
             ## Read out tag data
             if ( self.__rfid.readTag() != True ):
                 raise Exception('User aborted!')
 
             ## Show additional information
-            print '------------------------'
-            print 'Tag ID:       ' + self.__rfid.tagId
-            print 'Tag type:     ' + self.__rfid.tagType
-            print '------------------------'
+            print('------------------------')
+            print('Tag ID:       ' + self.__rfid.tagId)
+            print('Tag type:     ' + self.__rfid.tagType)
+            print('------------------------')
 
             ## Calculates hash of tag ID
-            print 'Calculating hash...'
+            print('Calculating hash...')
             tagHash = hashlib.sha256(salt.encode() + self.__rfid.rawTag.encode()).hexdigest()
 
-            print 'Checking if calculated hash matches stored hash...'
+            print('Checking if calculated hash matches stored hash...')
 
             ## Checks if read hash matches stored hash
             if ( tagHash == expectedTagHash ):
-                print 'Hashes match!'
-                print 'Check for user "' + userName + '" was successful!'
+                print('Hashes match!')
+                print('Check for user "' + userName + '" was successful!')
             else:
                 raise Exception('The found tag is not assigned to user!')
 
         except Exception as e:
-            print '[Exception] Check for user "' + userName + '" failed: ' + e.message
+            print('[Exception] Check for user "' + userName + '" failed: ' + e)
             return False
 
         return True

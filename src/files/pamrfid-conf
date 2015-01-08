@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-pamrfid
+PAM RFID
 
-Copyright 2014 Philipp Meisberger, Bastian Raschke.
+Copyright 2015 Philipp Meisberger, Bastian Raschke.
 All rights reserved.
 """
 
@@ -12,9 +12,9 @@ import argparse
 import hashlib
 import uuid
 import os
-import pamrfid.Config as Config
-import pamrfid.__version as VERSION
-import PyRfid.PyRfid as PyRfid
+from pamrfid import __version__ as VERSION
+from pamrfid.Config import Config
+from PyRfid.PyRfid import PyRfid
 
 
 class PamRfid(object):
@@ -42,7 +42,7 @@ class PamRfid(object):
             self.__config = Config('/etc/pamrfid.conf')
 
         except Exception as e:
-            print '[Exception] ' + e.message
+            print('[Exception] ' + e)
             exit(1)
 
         ## Gets connection values
@@ -54,7 +54,7 @@ class PamRfid(object):
             self.__rfid = PyRfid(port, baudRate)
 
         except Exception as e:
-            print '[Exception] The RFID sensor could not be initialized: ' + e.message
+            print('[Exception] The RFID sensor could not be initialized: ' + e)
             exit(1)
 
     def __showConfirmationDialog(self, question = ''):
@@ -78,22 +78,22 @@ class PamRfid(object):
 
         ## Checks if user is root
         if ( os.geteuid() != 0 ):
-            print '[Error] You need to have root privileges to add a user!'
+            print('[Error] You need to have root privileges to add a user!')
             return False
 
         ## Checks if the the user is not already added
         if ( self.__config.itemExists('Users', userName) == True ):
-            print '[Error] The user "' + userName + '" is already added!'
+            print('[Error] The user "' + userName + '" is already added!')
             return False
 
         ## Confirmation dialog
         if ( self.__showConfirmationDialog('Are you sure you want to add the user "' + userName + '"?') == False ):
-            print 'Adding user canceled.'
+            print('Adding user canceled.')
             return False
 
         ## Tries to bind a tag to a user
         try:
-            print 'Waiting for tag...'
+            print('Waiting for tag...')
 
             ## Read out tag data
             if ( self.__rfid.readTag() != True ):
@@ -115,12 +115,12 @@ class PamRfid(object):
             self.__config.writeList('Users', userName, userData)
 
             if ( self.__config.save() == True ):
-                print 'The user "' + userName + '" has been added successfully!'
+                print('The user "' + userName + '" has been added successfully!')
             else:
                 raise Exception('The configuration could not be written!')
 
         except Exception as e:
-            print '[Exception] Error while adding user: ' + e.message
+            print('[Exception] Error while adding user: ' + e)
             return False
 
         return True
@@ -135,29 +135,29 @@ class PamRfid(object):
 
         ## Checks if user is root
         if ( os.geteuid() != 0 ):
-            print '[Error] You need to have root privileges to add a user!'
+            print('[Error] You need to have root privileges to add a user!')
             return False
 
         ## Checks if the the user was already added
         if ( self.__config.itemExists('Users', userName) == False ):
-            print '[Error] The user "' + userName + '" is not added!'
+            print('[Error] The user "' + userName + '" is not added!')
             return False
 
         ## Confirmation dialog
         if ( self.__showConfirmationDialog('Are you sure you want to remove the user "' + userName + '"?') == False ):
-            print 'Removing user canceled.'
+            print('Removing user canceled.')
             return False
 
         ## Tries to delete tag
         try:
             ## Removes entries from configuration file
             if ( self.__config.remove('Users', userName) == True and self.__config.save() == True ):
-                print 'The user "' + userName + '" has been removed successfully!'
+                print('The user "' + userName + '" has been removed successfully!')
             else:
                 raise Exception('The configuration file could not be written!')
 
         except Exception as e:
-            print '[Exception] Error while removing user: ' + e.message
+            print('[Exception] Error while removing user: ' + e)
             return False
 
         return True

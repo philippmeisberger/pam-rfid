@@ -6,3 +6,4 @@ set -e
 pam-auth-update --package rfid
 
 #DEBHELPER#
+exit 0

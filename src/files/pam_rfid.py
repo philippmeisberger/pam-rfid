@@ -3,9 +3,9 @@
 
 """
 pamrfid
-PAM implementation.
+PAM implementation
 
-Copyright 2014 Philipp Meisberger, Bastian Raschke.
+Copyright 2015 Philipp Meisberger, Bastian Raschke.
 All rights reserved.
 """
 
@@ -16,6 +16,23 @@ import os
 import pamrfid.Config as Config
 import pamrfid.__version as VERSION
 import PyRfid.PyRfid as PyRfid
+
+
+def showPAMTextMessage(pamh, message):
+    """
+    Shows a PAM conversation text info.
+
+    @param pamh
+    @param string message
+
+    @return void
+    """
+
+    if ( type(message) != str ):
+        raise ValueError('The given parameter is not a string!')
+
+    msg = pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': '+ message)
+    pamh.conversation(msg)
 
 
 def auth_log(message, priority=syslog.LOG_INFO):
@@ -93,11 +110,10 @@ def pam_sm_authenticate(pamh, flags, argv):
 
     except Exception as e:
         auth_log(e.message, syslog.LOG_CRIT)
-        pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Sensor initialization failed!'))
+        showPAMTextMessage(pamh, 'Sensor initialization failed!')
         return pamh.PAM_IGNORE
 
-    msg = pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Waiting for tag...')
-    pamh.conversation(msg)
+    showPAMTextMessage(pamh, 'Waiting for tag...')
 
     ## Tries to read RFID
     try:
@@ -111,16 +127,16 @@ def pam_sm_authenticate(pamh, flags, argv):
         ## Checks if the read Hash matches the stored
         if ( tagHash == expectedTagHash ):
             auth_log('Access granted!')
-            pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Access granted!'))
+            showPAMTextMessage(pamh, 'Access granted!')
             return pamh.PAM_SUCCESS
         else:
             auth_log('The found match is not assigned to user "' + userName + '"!', syslog.LOG_WARNING)
-            pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Access denied!'))
+            showPAMTextMessage(pamh, 'Access denied!')
             return pamh.PAM_AUTH_ERR
 
     except Exception as e:
         auth_log('RFID read failed!' + e.message, syslog.LOG_CRIT)
-        pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, 'pamrfid ' + VERSION + ': Access denied!'))
+        showPAMTextMessage(pamh, 'Access denied!')
         return pamh.PAM_AUTH_ERR
 
     ## Denies for default

@@ -6,7 +6,7 @@ Standards-Version: 3.9.4
 Build-Depends: debhelper (>= 9),
                python (>= 2.7),
                python-setuptools,
-               bash-completion
+               bash-completion 
 
 Package: libpam-rfid
 Provides: pamrfid
