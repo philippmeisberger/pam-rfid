@@ -15,7 +15,7 @@ import syslog
 import os
 import pamrfid.Config as Config
 import pamrfid.__version as VERSION
-import PyRfid.PyRfid as PyRfid
+import pyrfid.PyRfid as PyRfid
 
 
 def showPAMTextMessage(pamh, message):
