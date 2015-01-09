@@ -13,7 +13,7 @@ import hashlib
 import uuid
 from pamrfid import __version__ as VERSION
 from pamrfid.Config import Config
-from pyrfid.PyRfid import PyRfid
+from pyrfid.pyrfid import PyRfid
 
 
 class PamRfidCheck(object):

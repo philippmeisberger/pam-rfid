@@ -13,9 +13,9 @@ import hashlib
 import uuid
 import syslog
 import os
-import pamrfid.Config as Config
-import pamrfid.__version as VERSION
-import pyrfid.PyRfid as PyRfid
+from pamrfid import __version__ as VERSION
+from pamrfid.Config import Config
+from pyrfid.pyrfid import PyRfid
 
 
 def showPAMTextMessage(pamh, message):
