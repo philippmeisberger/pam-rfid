@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from setuptools import setup, find_packages
+
+import sys
+sys.path.append('./files/')
+
+## Dynamically get the module version
+packageVersion = __import__('pamfingerprint').__version__
 
 setup(
     name            = 'libpam-rfid',
-    version         = '1.2',
+    version         = packageVersion,
     description     = 'Pluggable Authentication Module (PAM) for hardware authentication via RFID.',
     author          = 'Philipp Meisberger',
     author_email    = 'team@pm-codeworks.de',

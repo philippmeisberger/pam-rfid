@@ -2,15 +2,12 @@
 # -*- coding: utf-8 -*-
 
 """
-PAM Fingerprint
-@authors Philipp Meisberger <team@pm-codeworks.de>, Bastian Raschke <bastian.raschke@posteo.de>
+PAM RFID
 
-Copyright 2015 Philipp Meisberger, Bastian Raschke
+Copyright 2014 Philipp Meisberger <team@pm-codeworks.de>,
+               Bastian Raschke <bastian.raschke@posteo.de>
 All rights reserved.
 """
 
-__version__ = '1.2'
-__copyright__ = 'Philipp Meisberger, Bastian Raschke'
-__organization__ = 'PM Code Works'
-__license__ = 'Simplified BSD 3 license'
-__authors__ = ['Philipp Meisberger, Bastian Raschke']
+__version__ = '1.3'
+CONFIG_FILE = '/etc/pamrfid.conf'

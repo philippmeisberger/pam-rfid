@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-PAM RFID
+PAM RFID configuration program
 
-Copyright 2015 Philipp Meisberger, Bastian Raschke.
+Copyright 2014 Philipp Meisberger <team@pm-codeworks.de>,
+               Bastian Raschke <bastian.raschke@posteo.de>
 All rights reserved.
 """
 
@@ -12,8 +13,9 @@ import argparse
 import hashlib
 import uuid
 import os
+
 from pamrfid import __version__ as VERSION
-from pamrfid.Config import Config
+from pamrfid import CONFIG_FILE
 from pyrfid.pyrfid import PyRfid
 
 
@@ -37,20 +39,25 @@ class PamRfid(object):
 
         """
 
-        ## Tries to init config instance
+        ## Tries to read configuration
         try:
-            self.__config = Config('/etc/pamrfid.conf')
+            ## Checks if path/file is readable
+            if ( os.access(CONFIG_FILE, os.R_OK) == False ):
+                raise Exception('The configuration file "' + CONFIG_FILE + '" is not readable!')
+
+            self.__config = ConfigParser.ConfigParser()
+            self.__config.read(CONFIG_FILE)
 
         except Exception as e:
             print('[Exception] ' + str(e))
             exit(1)
 
-        ## Gets connection values
-        port = self.__config.readString('PyRfid', 'port')
-        baudRate = self.__config.readInteger('PyRfid', 'baudRate')
-
-        ## Tries to establish connection
         try:
+            ## Gets connection values
+            port = self.__config.get('PyRfid', 'port')
+            baudRate = int(self.__config.get('PyRfid', 'baudRate'), 10)
+
+            ## Tries to establish connection
             self.__rfid = PyRfid(port, baudRate)
 
         except Exception as e:
@@ -82,7 +89,7 @@ class PamRfid(object):
             return False
 
         ## Checks if the the user is not already added
-        if ( self.__config.itemExists('Users', userName) == True ):
+        if ( self.__config.has_option('Users', userName) == True ):
             print('[Error] The user "' + userName + '" is already added!')
             return False
 
@@ -112,9 +119,12 @@ class PamRfid(object):
             )
 
             ## Adds user to configuration file
-            self.__config.writeList('Users', userName, userData)
+            self.__config.set('Users', userName, ','.join(userData))
 
-            if ( self.__config.save() == True ):
+            if ( os.access(CONFIG_FILE, os.W_OK) == True ):
+                f = open(CONFIG_FILE, 'w')
+                self.__config.write(f)
+                f.close()
                 print('The user "' + userName + '" has been added successfully!')
             else:
                 raise Exception('The configuration could not be written!')
@@ -139,7 +149,7 @@ class PamRfid(object):
             return False
 
         ## Checks if the the user was already added
-        if ( self.__config.itemExists('Users', userName) == False ):
+        if ( self.__config.has_option('Users', userName) == False ):
             print('[Error] The user "' + userName + '" is not added!')
             return False
 
@@ -151,7 +161,10 @@ class PamRfid(object):
         ## Tries to delete tag
         try:
             ## Removes entries from configuration file
-            if ( self.__config.remove('Users', userName) == True and self.__config.save() == True ):
+            if ( self.__config.remove_option('Users', userName) == True ) and ( os.access(CONFIG_FILE, os.W_OK) == True ):
+                f = open(CONFIG_FILE, 'w')
+                self.__config.write(f)
+                f.close()
                 print('The user "' + userName + '" has been removed successfully!')
             else:
                 raise Exception('The configuration file could not be written!')

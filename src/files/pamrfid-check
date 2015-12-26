@@ -2,23 +2,26 @@
 # -*- coding: utf-8 -*-
 
 """
-PAM RFID
+PAM RFID configuration check
 
-Copyright 2015 Philipp Meisberger, Bastian Raschke.
+Copyright 2014 Philipp Meisberger <team@pm-codeworks.de>,
+               Bastian Raschke <bastian.raschke@posteo.de>
 All rights reserved.
 """
 
 import argparse
 import hashlib
 import uuid
+import os
+
 from pamrfid import __version__ as VERSION
-from pamrfid.Config import Config
+from pamrfid import CONFIG_FILE
 from pyrfid.pyrfid import PyRfid
 
 
 class PamRfidCheck(object):
     """
-    pamrfid simulation program.
+    Configuration check program.
 
     The PyRfid library instance
     @var PyRfid __rfid
@@ -32,20 +35,25 @@ class PamRfidCheck(object):
 
         """
 
-        ## Tries to init config instance
+        ## Tries to read configuration
         try:
-            self.__config = Config('/etc/pamrfid.conf')
+            ## Checks if path/file is readable
+            if ( os.access(CONFIG_FILE, os.R_OK) == False ):
+                raise Exception('The configuration file "' + CONFIG_FILE + '" is not readable!')
+
+            self.__config = ConfigParser.ConfigParser()
+            self.__config.read(CONFIG_FILE)
 
         except Exception as e:
             print('[Exception] ' + str(e))
             exit(1)
 
-        ## Gets connection values
-        port = self.__config.readString('PyRfid', 'port')
-        baudRate = self.__config.readInteger('PyRfid', 'baudRate')
-
-        ## Tries to establish connection
         try:
+            ## Gets connection values
+            port = self.__config.get('PyRfid', 'port')
+            baudRate = int(self.__config.get('PyRfid', 'baudRate'), 10)
+
+            ## Tries to establish connection
             self.__rfid = PyRfid(port, baudRate)
 
         except Exception as e:
@@ -62,13 +70,18 @@ class PamRfidCheck(object):
         """
 
         ## Checks if the the user was already added
-        if ( self.__config.itemExists('Users', userName) == False ):
+        if ( self.__config.has_option('Users', userName) == False ):
             print('[Error] The user "' + userName + '" is not added!')
             return False
 
         ## Tries to get user information
         try:
-            userData = self.__config.readList('Users', userName)
+            userData = self.__config.get('Users', userName).split(',')
+
+            ## Validates user information
+            if ( len(userData) != 2 ):
+                raise Exception('The user information of "' + userName + '" is invalid!')
+
             salt = userData[0]
             expectedTagHash = userData[1]
 
