@@ -16,6 +16,7 @@ import os
 import ConfigParser
 
 from pamrfid import __version__ as VERSION
+from pamrfid import CONFIG_FILE
 from pyrfid.pyrfid import PyRfid
 
 
@@ -143,8 +144,8 @@ def pam_sm_authenticate(pamh, flags, argv):
     ## Initialize RFID sensor
     try:
         ## Gets RFID sensor connection values
-        port = config.readString('PyRfid', 'port')
-        baudRate = config.readInteger('PyRfid', 'baudRate')
+        port = configParser.get('PyRfid', 'port')
+        baudRate = int(configParser.get('PyRfid', 'baudRate'), 10)
 
         ## Tries to establish connection
         rfid = PyRfid(port, baudRate)
