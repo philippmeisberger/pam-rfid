@@ -1,5 +1,5 @@
 PAM RFID
-===============
+========
 
 PAM RFID is a Linux Pluggable Authentication Module (PAM) for RFID authentication. It uses the RDM6300 RFID reader in conjunction with the PyRfid library <https://github.com/philippmeisberger/pyrfid>.
 
@@ -12,7 +12,7 @@ Add PM Codeworks repository
 
 Add PM Codeworks key
 
-    ~# wget -O - http://apt.pm-codeworks.de/pm-codeworks.de.gpg.key | apt-key add -
+    ~# wget -O - http://apt.pm-codeworks.de/pm-codeworks.de.gpg | apt-key add -
     ~# apt-get update
 
 Install the packages
