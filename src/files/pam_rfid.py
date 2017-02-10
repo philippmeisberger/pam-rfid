@@ -55,7 +55,7 @@ def showPAMTextMessage(pamh, message, errorMessage=False):
         else:
             style = pamh.PAM_TEXT_INFO
 
-        msg = pamh.Message(style, 'pamrfid ' + VERSION + ': '+ str(message))
+        msg = pamh.Message(style, 'PAM RFID ' + VERSION + ': '+ str(message))
         pamh.conversation(msg)
         return True
 
@@ -74,7 +74,7 @@ def auth_log(message, priority=syslog.LOG_INFO):
     """
 
     syslog.openlog(facility=syslog.LOG_AUTH)
-    syslog.syslog(priority, 'pamrfid: ' + message)
+    syslog.syslog(priority, 'PAM RFID: ' + message)
     syslog.closelog()
 
 
