@@ -6,7 +6,7 @@ import sys
 sys.path.append('./files/')
 
 ## Dynamically get the module version
-packageVersion = __import__('pamfingerprint').__version__
+packageVersion = __import__('pamrfid').__version__
 
 setup(
     name            = 'libpam-rfid',
