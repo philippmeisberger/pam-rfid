@@ -1,6 +1,12 @@
 ## Uses glob syntax, regex sucks ;)
 syntax: glob
 
-debian/libpam-rfid/*
+debian/libpam-rfid
 **.pyc
-**.out
+
+## Debian package files
+**.dsc
+**.xz
+**.deb
+**.build
+**.changes
