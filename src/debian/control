@@ -4,22 +4,22 @@ Section: admin
 Priority: optional
 Standards-Version: 3.9.6
 Build-Depends: debhelper (>= 9),
+               dh-python,
                python (>= 2.7),
                python-setuptools,
-               bash-completion 
+               bash-completion
+XS-Python-Version: >= 2.7
+Vcs-Git: https://github.com/philippmeisberger/pam-rfid.git
 Homepage: http://www.pm-codeworks.de/pamrfid.html
 
 Package: libpam-rfid
 Provides: pamrfid
-Replaces: pamrfid
-Conflicts: pamrfid
-Depends: python (>= 2.7),
+Depends: ${python:Depends},
+         ${misc:Depends},
          python-argparse,
          libpam-python,
          python-rfid (>=1.1),
-         bash-completion,
-         ${python:Depends},
-         ${misc:Depends}
+         bash-completion
 Architecture: all
 Description: Pluggable Authentication Module for hardware authentication via RFID
  A 125kHz UART compatible RFID reader is required to use this module. The
