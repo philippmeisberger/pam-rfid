@@ -21,7 +21,7 @@ Install the packages
 
     ~# apt-get install python-rfid libpam-rfid
 
-Add group "dialout" for each user which should be able to use pamfingerprint
+Add group "dialout" for each user which should be able to use PAM RFID
 
     ~# usermod -a -G dialout <username>
     ~# reboot
