@@ -8,5 +8,5 @@ debian/libpam-rfid
 **.dsc
 **.xz
 **.deb
-**.build
+**.build*
 **.changes
