@@ -3,7 +3,7 @@ PAM RFID
 
 PAM RFID is a Linux Pluggable Authentication Module (PAM) for RFID authentication. It uses an EM4100 compatible RFID reader (e.g. RDM6300) in conjunction with the PyRfid library <https://github.com/philippmeisberger/pyrfid>.
 
-Per default the password authentication is set as fallback in case no RFID sensor is connected. Two-factor authentication is also possible. The module has to be configured by the `pamrfid-conf` program. To simulate an authentication process the `pamrfid-check` program can be used.
+Per default the password authentication is set as fallback in case no RFID sensor is connected. Two-factor authentication is also possible. The module has to be configured by the `pamrfid-conf` program.
 
 Installation
 ------------
@@ -45,7 +45,7 @@ Clone this repository
 
 Build the package
 
-    ~$ cd ./pam-rfid/
+    ~$ cd ./pam-rfid/src/
     ~$ dpkg-buildpackage -uc -us
 
 Install the package
@@ -70,7 +70,7 @@ Enable PAM RFID for a user
 
 Test if everything works well
 
-    ~# pamrfid-check --check-user <username>
+    ~# pamrfid-conf --check-user <username>
 
 Questions and suggestions
 -------------------------

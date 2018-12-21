@@ -6,12 +6,12 @@ pamrfid-conf \- PAM RFID configuration program
 .SH SYNOPSIS
 .nf
 .fam C
-\fBpamrfid-conf\fP [\fB--add-user\fP NAME | \fB--remove-user\fP NAME | \fB--version\fP | \fB--help\fP]
+\fBpamrfid-conf\fP \fB--add-user\fP NAME | \fB--remove-user\fP NAME | \fB--check-user\fP NAME | \fB--version\fP | \fB--help\fP
 .fam T
 .fi
 
 .SH DESCRIPTION
-\fBpamrfid-conf\fP allows (as root) to bind or unbind users to PAM RFID.
+\fBpamrfid-conf\fP allows (as root) to add or remove users to PAM RFID and to simulate RFID authentication process for already added users.
 
 .SH OPTIONS
 .TP
@@ -26,6 +26,11 @@ Removes a user.
 
 .TP
 .B
+\fB--check-user\fR NAME
+Runs check for an existing user.
+
+.TP
+.B
 \fB--version\fR
 Prints version and exits.
 
@@ -34,9 +39,6 @@ Prints version and exits.
 \fB--help\fR, \fB-h\fR
 Show summary of options.
 .PP
-
-.SH "SEE ALSO"
-\fBpamrfid\fR(1), \fBpamrfid-check\fR(1)
 
 .SH FILES
 /etc/pamrfid.conf

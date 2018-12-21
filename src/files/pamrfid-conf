@@ -176,6 +176,67 @@ class PamRfid(object):
 
         return True
 
+    def checkUser(self, userName):
+        """
+        Do a RFID simulation for a given user.
+
+        @param string userName
+        @return boolean
+        """
+
+        ## Checks if the the user was already added
+        if ( self.__config.has_option('Users', userName) == False ):
+            print('[Error] The user "' + userName + '" is not added!')
+            return False
+
+        ## Tries to get user information
+        try:
+            userData = self.__config.get('Users', userName).split(',')
+
+            ## Validates user information
+            if ( len(userData) != 2 ):
+                raise Exception('The user information of "' + userName + '" is invalid!')
+
+            salt = userData[0]
+            expectedTagHash = userData[1]
+
+        except Exception as e:
+            print('[Exception] ' + str(e))
+            return False
+
+        ## Tries to check RFID
+        try:
+            print('Waiting for tag...')
+
+            ## Read out tag data
+            if ( self.__rfid.readTag() != True ):
+                raise Exception('User aborted!')
+
+            ## Show additional information
+            print('------------------------')
+            print('Tag ID:       ' + self.__rfid.tagId)
+            print('Tag type:     ' + self.__rfid.tagType)
+            print('------------------------')
+
+            ## Calculates hash of tag ID
+            print('Calculating hash...')
+            tagHash = hashlib.sha256(salt.encode() + self.__rfid.rawTag.encode()).hexdigest()
+
+            print('Checking if calculated hash matches stored hash...')
+
+            ## Checks if read hash matches stored hash
+            if ( tagHash == expectedTagHash ):
+                print('Hashes match!')
+                print('Check for user "' + userName + '" was successful!')
+            else:
+                raise Exception('The found tag is not assigned to user!')
+
+        except Exception as e:
+            print('[Exception] Check for user "' + userName + '" failed: ' + str(e))
+            return False
+
+        return True
+
 
 if ( __name__ == '__main__' ):
 
@@ -183,6 +244,7 @@ if ( __name__ == '__main__' ):
 
     parser.add_argument('--add-user', metavar='NAME', help='Adds a new user.')
     parser.add_argument('--remove-user', metavar='NAME', help='Removes a user.')
+    parser.add_argument('--check-user', metavar='NAME', help='Checks RFID tag for an existing user.')
     parser.add_argument('--version', '-v', action='version', version='PAM RFID '+ VERSION, help='Prints version and exits.')
 
     args = vars(parser.parse_args())
@@ -191,5 +253,7 @@ if ( __name__ == '__main__' ):
         PamRfid().addUser(args['add_user'])
     elif ( args['remove_user'] ):
         PamRfid().removeUser(args['remove_user'])
+    elif ( args['check_user'] ):
+        PamRfid().checkUser(args['check_user'])
     else:
         parser.print_help()

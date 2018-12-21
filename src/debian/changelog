@@ -1,3 +1,11 @@
+libpam-rfid (1.4) UNRELEASED; urgency=medium
+
+  * Minor release
+  * Added --check-user option to pamrfid-conf
+  * Removed pamrfid-check
+
+ -- Philipp Meisberger <team@pm-codeworks.de>  Fri, 21 Dec 2018 11:23:03 +0100
+
 libpam-rfid (1.3.1) stable; urgency=low
 
   * Service release
