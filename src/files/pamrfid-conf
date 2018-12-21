@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import uuid
 import os
+import pwd
 import ConfigParser
 
 from pamrfid import __version__ as VERSION
@@ -101,6 +102,9 @@ class PamRfid(object):
 
         ## Tries to bind a tag to a user
         try:
+            ## Check if system user exists?
+            pwd.getpwnam(userName)
+
             print('Waiting for tag...')
 
             ## Read out tag data
