@@ -9,6 +9,7 @@ Build-Depends: debhelper (>= 9),
                python-setuptools,
                bash-completion
 X-Python-Version: >= 2.7
+Testsuite: autopkgtest-pkg-python
 Vcs-Browser: https://github.com/philippmeisberger/pam-rfid
 Vcs-Git: https://github.com/philippmeisberger/pam-rfid.git
 Homepage: http://www.pm-codeworks.de/pamrfid.html
