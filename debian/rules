@@ -5,4 +5,4 @@
 
 override_dh_auto_clean:
 	dh_auto_clean
-	rm -rf ./build/ ./files/*.egg-info/
+	rm -rf ./build/ ./src/*.egg-info/
