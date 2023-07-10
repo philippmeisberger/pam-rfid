@@ -10,7 +10,6 @@ All rights reserved.
 
 from setuptools import setup
 
-import sys
 from src.pamrfid import __version__
 
 setup(
