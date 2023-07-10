@@ -1,0 +1,17 @@
+.pybuild/
+.idea/
+*.egg-info
+*.pyc
+
+## Debian package files
+debian/.debhelper/
+debian/files
+debian/libpam-rfid
+debhelper-build-stamp
+*.debhelper
+*.substvars
+*.dsc
+*.xz
+*.deb
+*.build*
+*.changes
