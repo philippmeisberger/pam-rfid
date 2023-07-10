@@ -16,36 +16,23 @@ import os
 import pwd
 from configparser import ConfigParser
 
-from pamrfid import __version__ as VERSION
+from pamrfid import __version__ as version
 from pamrfid import CONFIG_FILE
 from pyrfid.pyrfid import PyRfid
 
 
 class PamRfid:
-    """
-    PAM RFID configuration program.
-
-    The PyRfid library instance
-    @var PyRfid __rfid
-
-    Config instance
-    @var Config __config
-    """
-
+    """PAM RFID configuration program."""
     __rfid = None
     __config = None
 
     def __init__(self):
-        """
-        Constructor
 
-        """
-
-        ## Tries to read configuration
+        # Tries to read configuration
         try:
-            ## Checks if path/file is readable
-            if ( os.access(CONFIG_FILE, os.R_OK) == False ):
-                raise Exception('The configuration file "' + CONFIG_FILE + '" is not readable!')
+            # Checks if path/file is readable
+            if not os.access(CONFIG_FILE, os.R_OK):
+                raise Exception('The configuration file "{0}" is not readable!'.format(CONFIG_FILE))
 
             self.__config = ConfigParser()
             self.__config.read(CONFIG_FILE)
@@ -55,29 +42,29 @@ class PamRfid:
             exit(1)
 
         try:
-            ## Gets connection values
+            # Gets connection values
             port = self.__config.get('PyRfid', 'port')
-            baudRate = int(self.__config.get('PyRfid', 'baudRate'), 10)
+            baud_rate = int(self.__config.get('PyRfid', 'baudRate'), 10)
 
-            ## Tries to establish connection
-            self.__rfid = PyRfid(port, baudRate)
+            # Tries to establish connection
+            self.__rfid = PyRfid(port, baud_rate)
 
         except Exception as e:
-            print('[Exception] The RFID sensor could not be initialized: ' + str(e))
+            print('[Exception] The RFID sensor could not be initialized: {0}'.format(e))
             exit(1)
 
-    def __showConfirmationDialog(self, question = ''):
+    def __show_confirmation_dialog(self, question=''):
         """
         Shows confirmation dialog.
 
-        @param string question
-        @return boolean
+        :param question:
+        :return: boolean
         """
 
         answer = input(question + ' (Y/n)')
-        return ( answer in ['y', 'Y', ''] )
+        return answer in ['y', 'Y', '']
 
-    def addUser(self, userName):
+    def add_user(self, username):
         """
         Enrolls new RFID tag and adds user to PAM RFID.
 
@@ -85,52 +72,52 @@ class PamRfid:
         @return boolean
         """
 
-        ## Checks if user is root
-        if ( os.geteuid() != 0 ):
+        # Checks if user is root
+        if os.geteuid() != 0:
             print('[Error] You need to have root privileges to add a user!')
             return False
 
-        ## Checks if the the user is not already added
-        if ( self.__config.has_option('Users', userName) == True ):
-            print('[Error] The user "' + userName + '" is already added!')
+        # Checks if the the user is not already added
+        if self.__config.has_option('Users', username):
+            print('[Error] The user "' + username + '" is already added!')
             return False
 
-        ## Confirmation dialog
-        if ( self.__showConfirmationDialog('Are you sure you want to add the user "' + userName + '"?') == False ):
+        # Confirmation dialog
+        if not self.__show_confirmation_dialog('Are you sure you want to add the user "' + username + '"?'):
             print('Adding user canceled.')
             return False
 
-        ## Tries to bind a tag to a user
+        # Tries to bind a tag to a user
         try:
-            ## Check if system user exists?
-            pwd.getpwnam(userName)
+            # Check if system user exists?
+            pwd.getpwnam(username)
 
             print('Waiting for tag...')
 
-            ## Read out tag data
-            if ( self.__rfid.readTag() != True ):
+            # Read out tag data
+            if not self.__rfid.readTag():
                 raise Exception('User aborted!')
 
-            ## Generates salt
+            # Generates salt
             salt = uuid.uuid4().hex
 
-            ## Calculates salted hash of tag
-            tagHash = hashlib.sha256(salt.encode() + self.__rfid.rawTag.encode()).hexdigest()
+            # Calculates salted hash of tag
+            tag_hash = hashlib.sha256(salt.encode() + self.__rfid.rawTag.encode()).hexdigest()
 
-            ## The new user information list
-            userData = (
+            # The new user information list
+            user_data = (
                 salt,
-                tagHash,
+                tag_hash,
             )
 
-            ## Adds user to configuration file
-            self.__config.set('Users', userName, ','.join(userData))
+            # Adds user to configuration file
+            self.__config.set('Users', username, ','.join(user_data))
 
-            if ( os.access(CONFIG_FILE, os.W_OK) == True ):
+            if os.access(CONFIG_FILE, os.W_OK):
                 f = open(CONFIG_FILE, 'w')
                 self.__config.write(f)
                 f.close()
-                print('The user "' + userName + '" has been added successfully!')
+                print('The user "' + username + '" has been added successfully!')
             else:
                 raise Exception('The configuration could not be written!')
 
@@ -140,37 +127,37 @@ class PamRfid:
 
         return True
 
-    def removeUser(self, userName):
+    def remove_user(self, username):
         """
         Removes RFID tag from configuration.
 
-        @param string userName
-        @return boolean
+        :param username:
+        :return: bool
         """
 
-        ## Checks if user is root
-        if ( os.geteuid() != 0 ):
+        # Checks if user is root
+        if os.geteuid() != 0:
             print('[Error] You need to have root privileges to remove a user!')
             return False
 
-        ## Checks if the the user was already added
-        if ( self.__config.has_option('Users', userName) == False ):
-            print('[Error] The user "' + userName + '" is not added!')
+        # Checks if the the user was already added
+        if not self.__config.has_option('Users', username):
+            print('[Error] The user "' + username + '" is not added!')
             return False
 
-        ## Confirmation dialog
-        if ( self.__showConfirmationDialog('Are you sure you want to remove the user "' + userName + '"?') == False ):
+        # Confirmation dialog
+        if not self.__show_confirmation_dialog('Are you sure you want to remove the user "' + username + '"?'):
             print('Removing user canceled.')
             return False
 
-        ## Tries to delete tag
+        # Tries to delete tag
         try:
-            ## Removes entries from configuration file
-            if ( self.__config.remove_option('Users', userName) == True ) and ( os.access(CONFIG_FILE, os.W_OK) == True ):
+            # Removes entries from configuration file
+            if self.__config.remove_option('Users', username) and os.access(CONFIG_FILE, os.W_OK):
                 f = open(CONFIG_FILE, 'w')
                 self.__config.write(f)
                 f.close()
-                print('The user "' + userName + '" has been removed successfully!')
+                print('The user "' + username + '" has been removed successfully!')
             else:
                 raise Exception('The configuration file could not be written!')
 
@@ -180,84 +167,84 @@ class PamRfid:
 
         return True
 
-    def checkUser(self, userName):
-        """
-        Do a RFID simulation for a given user.
+    def check_user(self, username):
+        """Executes a RFID check for a given user.
 
-        @param string userName
-        @return boolean
+        :param username:
+        :return: boolean
         """
 
-        ## Checks if the the user was already added
-        if ( self.__config.has_option('Users', userName) == False ):
-            print('[Error] The user "' + userName + '" is not added!')
+        # Checks if the user was already added
+        if not self.__config.has_option('Users', username):
+            print('[Error] The user "{0}" is not added!'.format(username))
             return False
 
-        ## Tries to get user information
+        # Tries to get user information
         try:
-            userData = self.__config.get('Users', userName).split(',')
+            user_data = self.__config.get('Users', username).split(',')
 
-            ## Validates user information
-            if ( len(userData) != 2 ):
-                raise Exception('The user information of "' + userName + '" is invalid!')
+            # Validates user information
+            if len(user_data) != 2:
+                raise Exception('The user information of "{0}" is invalid!'.format(username))
 
-            salt = userData[0]
-            expectedTagHash = userData[1]
+            salt = user_data[0]
+            expected_tag_hash = user_data[1]
 
         except Exception as e:
-            print('[Exception] ' + str(e))
+            print('[Exception] {0}'.format(e))
             return False
 
-        ## Tries to check RFID
+        # Tries to check RFID
         try:
             print('Waiting for tag...')
 
-            ## Read out tag data
-            if ( self.__rfid.readTag() != True ):
+            # Read out tag data
+            if not self.__rfid.readTag():
                 raise Exception('User aborted!')
 
-            ## Show additional information
+            # Show additional information
             print('------------------------')
-            print('Tag ID:       ' + self.__rfid.tagId)
-            print('Tag type:     ' + self.__rfid.tagType)
+            print('Tag ID:       {0}'.format(self.__rfid.tagId))
+            print('Tag type:     {0}'.format(self.__rfid.tagType))
             print('------------------------')
 
-            ## Calculates hash of tag ID
+            # Calculates hash of tag ID
             print('Calculating hash...')
-            tagHash = hashlib.sha256(salt.encode() + self.__rfid.rawTag.encode()).hexdigest()
+            tag_hash = hashlib.sha256(salt.encode() + self.__rfid.rawTag.encode()).hexdigest()
 
             print('Checking if calculated hash matches stored hash...')
 
-            ## Checks if read hash matches stored hash
-            if ( tagHash == expectedTagHash ):
+            # Checks if read hash matches stored hash
+            if tag_hash == expected_tag_hash:
                 print('Hashes match!')
-                print('Check for user "' + userName + '" was successful!')
+                print('Check for user "{0}" was successful!'.format(username))
             else:
                 raise Exception('The found tag is not assigned to user!')
 
         except Exception as e:
-            print('[Exception] Check for user "' + userName + '" failed: ' + str(e))
+            print('[Exception] Check for user "{0}" failed: {1}'.format(username, e))
             return False
 
         return True
 
 
-if ( __name__ == '__main__' ):
+if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='PAM RFID configuration program:')
 
     parser.add_argument('--add-user', metavar='NAME', help='Adds a new user.')
     parser.add_argument('--remove-user', metavar='NAME', help='Removes a user.')
     parser.add_argument('--check-user', metavar='NAME', help='Checks RFID tag for an existing user.')
-    parser.add_argument('--version', '-v', action='version', version='PAM RFID '+ VERSION, help='Prints version and exits.')
+    parser.add_argument('--version', '-v', action='version', version='PAM RFID {0}'.format(version),
+                        help='Prints version and exits.')
 
     args = vars(parser.parse_args())
 
-    if ( args['add_user'] ):
-        PamRfid().addUser(args['add_user'])
-    elif ( args['remove_user'] ):
-        PamRfid().removeUser(args['remove_user'])
-    elif ( args['check_user'] ):
-        PamRfid().checkUser(args['check_user'])
+    if args['add_user']:
+        PamRfid().add_user(args['add_user'])
+    elif args['remove_user']:
+        PamRfid().remove_user(args['remove_user'])
+    elif args['check_user']:
+        PamRfid().check_user(args['check_user'])
     else:
         parser.print_help()
