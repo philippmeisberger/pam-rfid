@@ -11,19 +11,22 @@ All rights reserved.
 from setuptools import setup
 
 import sys
-
-sys.path.insert(0, './files/')
-
-import pamrfid
+from src.pamrfid import __version__
 
 setup(
     name='libpam-rfid',
-    version=pamrfid.__version__,
+    version=__version__,
     description='Linux Pluggable Authentication Module (PAM) for hardware authentication via RFID.',
     author='Philipp Meisberger',
     author_email='team@pm-codeworks.de',
     url='http://www.pm-codeworks.de/pamrfid.html',
     license='D-FSL',
-    package_dir={'': 'files'},
+    package_dir={'': 'src'},
     packages=['pamrfid'],
+    classifiers=[
+        'Intended Audience :: System Administrators',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Operating System :: Linux',
+    ]
 )
