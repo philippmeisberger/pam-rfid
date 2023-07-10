@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -14,14 +14,14 @@ import hashlib
 import uuid
 import os
 import pwd
-import ConfigParser
+from configparser import ConfigParser
 
 from pamrfid import __version__ as VERSION
 from pamrfid import CONFIG_FILE
 from pyrfid.pyrfid import PyRfid
 
 
-class PamRfid(object):
+class PamRfid:
     """
     PAM RFID configuration program.
 
@@ -47,7 +47,7 @@ class PamRfid(object):
             if ( os.access(CONFIG_FILE, os.R_OK) == False ):
                 raise Exception('The configuration file "' + CONFIG_FILE + '" is not readable!')
 
-            self.__config = ConfigParser.ConfigParser()
+            self.__config = ConfigParser()
             self.__config.read(CONFIG_FILE)
 
         except Exception as e:
@@ -74,7 +74,7 @@ class PamRfid(object):
         @return boolean
         """
 
-        answer = raw_input(question + ' (Y/n)')
+        answer = input(question + ' (Y/n)')
         return ( answer in ['y', 'Y', ''] )
 
     def addUser(self, userName):

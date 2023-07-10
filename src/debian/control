@@ -2,11 +2,11 @@ Source: libpam-rfid
 Maintainer: Philipp Meisberger <team@pm-codeworks.de>
 Section: admin
 Priority: optional
-Standards-Version: 3.9.8
-Build-Depends: debhelper (>= 9),
+Standards-Version: 4.5.1
+Build-Depends: debhelper (>= 12),
                dh-python,
-               python (>= 2.7),
-               python-setuptools,
+               python3,
+               python3-setuptools,
                bash-completion
 X-Python-Version: >= 2.7
 Testsuite: autopkgtest-pkg-python
@@ -16,9 +16,9 @@ Homepage: http://www.pm-codeworks.de/pamrfid.html
 
 Package: libpam-rfid
 Provides: pamrfid
-Depends: ${python:Depends},
+Depends: ${python3:Depends},
          ${misc:Depends},
-         python-argparse,
+         python3-configargparse,
          libpam-python,
          python-rfid (>=1.1),
          bash-completion

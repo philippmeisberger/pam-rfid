@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -13,7 +13,7 @@ import hashlib
 import uuid
 import syslog
 import os
-import ConfigParser
+from configparser import ConfigParser
 
 from pamrfid import __version__ as VERSION
 from pamrfid import CONFIG_FILE
@@ -109,7 +109,7 @@ def pam_sm_authenticate(pamh, flags, argv):
         if ( os.access(CONFIG_FILE, os.R_OK) == False ):
             raise Exception('The configuration file "' + CONFIG_FILE + '" is not readable!')
 
-        configParser = ConfigParser.ConfigParser()
+        configParser = ConfigParser()
         configParser.read(CONFIG_FILE)
 
         ## Log the user

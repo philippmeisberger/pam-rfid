@@ -1,3 +1,10 @@
+libpam-rfid (1.5) UNRELEASED; urgency=medium
+
+  * Minor release
+  * migrated to python3 
+
+ -- Philipp Meisberger <team@pm-codeworks.de>  Mon, 10 Jul 2023 21:22:03 +0200
+
 libpam-rfid (1.4) stable; urgency=medium
 
   * Minor release
