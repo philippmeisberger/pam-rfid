@@ -8,7 +8,6 @@ Build-Depends: debhelper (>= 12),
                python3,
                python3-setuptools,
                bash-completion
-X-Python-Version: >= 2.7
 Testsuite: autopkgtest-pkg-python
 Vcs-Browser: https://github.com/philippmeisberger/pam-rfid
 Vcs-Git: https://github.com/philippmeisberger/pam-rfid.git
@@ -20,7 +19,7 @@ Depends: ${python3:Depends},
          ${misc:Depends},
          python3-configargparse,
          libpam-python,
-         python-rfid (>=1.1),
+         python3-rfid (>=1.1),
          bash-completion
 Architecture: all
 Description: Pluggable Authentication Module for hardware authentication via RFID
