@@ -68,8 +68,8 @@ class PamRfid:
         """
         Enrolls new RFID tag and adds user to PAM RFID.
 
-        @param string userName
-        @return boolean
+        :param username:
+        :return: boolean
         """
 
         # Checks if user is root
@@ -77,7 +77,7 @@ class PamRfid:
             print('[Error] You need to have root privileges to add a user!')
             return False
 
-        # Checks if the the user is not already added
+        # Checks if the user is not already added
         if self.__config.has_option('Users', username):
             print('[Error] The user "' + username + '" is already added!')
             return False
@@ -140,7 +140,7 @@ class PamRfid:
             print('[Error] You need to have root privileges to remove a user!')
             return False
 
-        # Checks if the the user was already added
+        # Checks if the user was already added
         if not self.__config.has_option('Users', username):
             print('[Error] The user "' + username + '" is not added!')
             return False
