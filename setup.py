@@ -9,7 +9,6 @@ All rights reserved.
 """
 
 from setuptools import setup
-
 from src.pamrfid import __version__
 
 setup(
@@ -18,7 +17,7 @@ setup(
     description='Linux Pluggable Authentication Module (PAM) for hardware authentication via RFID.',
     author='Philipp Meisberger',
     author_email='team@pm-codeworks.de',
-    url='http://www.pm-codeworks.de/pamrfid.html',
+    url='https://www.pm-codeworks.de/pamrfid.html',
     license='D-FSL',
     package_dir={'': 'src'},
     packages=['pamrfid'],
@@ -26,6 +25,6 @@ setup(
         'Intended Audience :: System Administrators',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Operating System :: Linux',
+        'Operating System :: POSIX :: Linux',
     ]
 )
