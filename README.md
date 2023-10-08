@@ -45,7 +45,7 @@ Clone this repository
 
 Build the package
 
-    ~$ cd ./pam-rfid/src/
+    ~$ cd ./pam-rfid/
     ~$ sudo mk-build-deps -i debian/control
     ~$ dpkg-buildpackage -uc -us
 
